@@ -4,7 +4,9 @@
   let ctx = null, master = null, musicBus = null, sfxBus = null, sfxRoot = null, verb = null, noiseBuf = null;
   let muted = localStorage.getItem('powerland-muted') === '1';
   let wanted = null, cur = null;
+  let outNode = null, recDest = null;
   const MASTER_VOL = 1;
+  const rnd = Math.random;
 
   const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
 
@@ -13,7 +15,7 @@
     const buf = ctx.createBuffer(2, len, ctx.sampleRate);
     for (let c = 0; c < 2; c++) {
       const d = buf.getChannelData(c);
-      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+      for (let i = 0; i < len; i++) d[i] = (rnd() * 2 - 1) * Math.pow(1 - i / len, 3);
     }
     return buf;
   }
@@ -44,6 +46,7 @@
     comp.attack.value = 0.003;
     comp.release.value = 0.15;
     master.connect(comp).connect(ctx.destination);
+    outNode = comp;
     verb = ctx.createConvolver();
     verb.buffer = impulse(2.6);
     const verbOut = ctx.createGain();
@@ -53,7 +56,7 @@
     sfxRoot = sfxBus = makeBus(2.2, 0.2);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const nd = noiseBuf.getChannelData(0);
-    for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    for (let i = 0; i < nd.length; i++) nd[i] = rnd() * 2 - 1;
     const w = wanted;
     wanted = null;
     setMusic(w);
@@ -161,7 +164,7 @@
     }
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     s.connect(fl).connect(g).connect(out);
-    s.start(t, Math.random() * 1.5);
+    s.start(t, rnd() * 1.5);
     s.stop(t + dur + 0.05);
   }
 
@@ -405,6 +408,113 @@
       drums: { k: 'x.x...x.x.x...x.', s: '....x.......x.x.', h: 'x.x.x.x.x.x.x.x.', T: 'x.......x.......', c: CRASH8, p: ROLL8 },
       dv: { T: 0.4 },
     },
+    battle_knight: {
+      bpm: 152, prog: 'Em C Am B Em C D B',
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x.xox.xox.xox.xo', vol: 0.27, len: 0.7 },
+        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.05 },
+        { kind: 'pad', inst: 'brass', pat: 'x..x..x.x..x..x.', vol: 0.03, len: 0.4 },
+        { kind: 'tone', inst: 'stacc', pat: '0.1.2.0.1.2.0.1.', vol: 0.032 },
+        {
+          kind: 'tone', inst: 'horn', vol: 0.11,
+          pat: ['2---3-4-5-------', '4---3---2-------', '2---3-4-5---6---', '5---------------', '6---5---4---5---', '4---3---2-------', '3---4---5---6---', '5---------------'],
+        },
+      ],
+      drums: { k: 'x...x...x...x...', s: '..x...x.x.x...xx', h: 'x.x.x.x.x.x.x.x.', T: 'x.......x.......', c: CRASH8, p: ROLL8 },
+      dv: { s: 0.18, h: 0.025, T: 0.4 },
+    },
+    maze: {
+      bpm: 96, prog: 'Am Am F E Dm Am E E',
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x..x..x.x..x..x.', vol: 0.24 },
+        { kind: 'pad', inst: 'organ', pat: 'x---------------', vol: 0.035 },
+        { kind: 'tone', inst: 'harp', pat: '0.1.2.1.0.1.2.3.', vol: 0.06 },
+        {
+          kind: 'tone', inst: 'flute', vol: 0.06,
+          pat: ['2-------1---0---', '1---------------', '2---3---4-------', '3---------------', '2---1---2---3---', '4-------3-------', '2---1---0---1---', '0---------------'],
+        },
+      ],
+      drums: { k: 'x.......x.......', t: '......x.......x.', h: '..x...x...x...x.', p: ['', '', '', 'x...............'] },
+      dv: { h: 0.025, t: 0.15 },
+    },
+    menu: {
+      bpm: 120, prog: 'D Bb C D D Bb C A',
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x.x.o.x.x.x.o.x.', vol: 0.24 },
+        { kind: 'pad', inst: 'organ', pat: 'x-------x-------', vol: 0.045 },
+        { kind: 'tone', inst: 'harp', pat: '0.1.2.1.0.1.2.3.', vol: 0.045 },
+        {
+          kind: 'tone', inst: 'flute', vol: 0.065,
+          pat: ['0---2-4-5---4---', '3---2---1-------', '2-3-4---5-4-3---', '4---------------', '0---2-4-5---6---', '5---4---3-------', '4-5-6-5-4-3-2---', '1---------------'],
+        },
+      ],
+      drums: { k: 'x...x...x...x...', s: '....x.......x.x.', h: 'x.x.x.x.x.x.x.x.' },
+      dv: { h: 0.02, s: 0.12 },
+    },
+    king: {
+      bpm: 112, prog: 'C Am F G C Am Dm G',
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x...o...x...o...', vol: 0.22 },
+        { kind: 'pad', inst: 'organ', pat: 'x-------x-------', vol: 0.04 },
+        { kind: 'tone', inst: 'pluck', pat: '..0.1...2.1.....', vol: 0.05 },
+        {
+          kind: 'tone', inst: 'flute', vol: 0.06,
+          pat: ['4-3-4---2-------', '1---2---3-------', '4-5-4-3-2-------', '3---------------', '4-3-4---2-------', '1---2---3-------', '2-3-4-5-4-3-2---', '0---------------'],
+        },
+      ],
+      drums: { k: 'x.......x.......', s: '....x.......x...', h: '..x...x...x...x.' },
+      dv: { h: 0.02, s: 0.12 },
+    },
+    battle_king: {
+      bpm: 132, prog: 'Cm Ab Eb Bb Cm Fm G G',
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x..xx..xx..xx.x.', vol: 0.28 },
+        { kind: 'pad', inst: 'organ', pat: 'x---------------', vol: 0.06 },
+        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.035 },
+        { kind: 'tone', inst: 'harp', pat: '0.1.2.3.2.1.0.1.', vol: 0.05 },
+        {
+          kind: 'tone', inst: 'brass', vol: 0.08,
+          pat: ['4---3-2-4-------', '5---4---3-------', '6---5-4-3---2---', '4---------------', '4---3-2-4---5---', '6---5---4-------', '3---4---5---6---', '7---------------'],
+        },
+      ],
+      drums: { k: 'x...x...x.x.x...', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', T: 'x.......x.......', c: CRASH8, p: ROLL8 },
+      dv: { T: 0.45 },
+    },
+    battle_joker: {
+      bpm: 176, prog: 'C G C G F C G C',
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x...o...x...o...', vol: 0.28, len: 0.5 },
+        { kind: 'tone', inst: 'organ', pat: '....012.....012.', vol: 0.05, len: 0.5 },
+        {
+          kind: 'tone', inst: 'square', oct: 1, vol: 0.05, len: 0.6,
+          pat: ['4321234-4321234-', '5-4-3-2-1-------', '4321234-4321234-', '5-6-7-----------', '6543456-6543456-', '4-3-2-1-0-------', '4-4-5-5-6-6-7---', '7---0-----------'],
+        },
+        {
+          kind: 'tone', inst: 'pluck', vol: 0.05,
+          pat: '0.2.4.2.0.2.4.2.',
+        },
+      ],
+      drums: { k: 'x...x...x...x...', s: '..x...x...x...x.', h: 'xxxxxxxxxxxxxxxx', c: CRASH8, p: ROLL8 },
+      dv: { h: 0.02 },
+    },
+    battle_archer: {
+      bpm: 160, prog: 'Dm Bb F C Dm Bb Gm A',
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x.xox.xox.xox.xo', vol: 0.26, len: 0.7 },
+        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.05 },
+        { kind: 'tone', inst: 'pluck', pat: '0123210101232101', vol: 0.055 },
+        {
+          kind: 'tone', inst: 'flute', oct: 1, vol: 0.08,
+          pat: ['4-3-2-1-2---4---', '5---4---3-------', '4-3-2-1-2---5---', '6---------------', '7---6---5---4---', '5---4---3-------', '4---5---6---5---', '4---------------'],
+        },
+        {
+          kind: 'tone', inst: 'horn', vol: 0.07,
+          pat: ['2-------3-------', '4-------3-------', '2-------3-------', '4---------------', '5-------4-------', '3-------2-------', '3-------4-------', '3---------------'],
+        },
+      ],
+      drums: { k: 'x...x.x.x...x...', s: '....x.......x..x', h: 'x.x.x.x.x.x.x.x.', T: 'x.......x.......', c: CRASH8, p: ROLL8 },
+      dv: { T: 0.4 },
+    },
     battle_lightGods: {
       bpm: 136, prog: 'Cm Ab Fm G Cm Ab Bb G',
       parts: [
@@ -451,6 +561,20 @@
         p: ROLL8,
       },
       dv: { k: 0.6, s: 0.26 },
+    },
+    castle: {
+      bpm: 84, prog: 'D G A D Bm G Em A',
+      parts: [
+        { kind: 'bass', inst: 'tri', pat: 'x.......x...x...', vol: 0.28 },
+        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.045 },
+        { kind: 'tone', inst: 'harp', pat: '0.1.2.3.4.3.2.1.', vol: 0.07 },
+        {
+          kind: 'tone', inst: 'horn', vol: 0.08,
+          pat: ['2-------1---2---', '3-------2-------', '2---1---0---1---', '2---------------', '3-------2---1---', '2-------3-------', '4---3---2---1---', '2---------------'],
+        },
+      ],
+      drums: { p: ['x...............', '', '', '', 'x...............', '', '', ''], h: '....x.......x...' },
+      dv: { h: 0.02, p: 0.3 },
     },
     ending: {
       bpm: 92, prog: 'C Am F G',
@@ -577,9 +701,9 @@
     },
     blip(t, who) {
       const f = {
-        MONKEY: 1000 + Math.random() * 400, ANGEL: 1100, 'SKY BIRD': 1350 + Math.random() * 250, 'LIGHT OF GODS': 200,
+        MONKEY: 1000 + rnd() * 400, ANGEL: 1100, 'SKY BIRD': 1350 + rnd() * 250, 'LIGHT OF GODS': 200, KNIGHT: 330, ARCHER: 760, JOKER: 500 + rnd() * 700, KING: 200,
       }[who] || 620;
-      const w = who === 'LIGHT OF GODS' ? 'sawtooth' : who === 'ANGEL' ? 'sine' : 'square';
+      const w = who === 'LIGHT OF GODS' || who === 'KING' ? 'sawtooth' : who === 'ANGEL' ? 'sine' : 'square';
       sweep(w, f, f * 0.97, t, 0.04, 0.06, sfxBus);
     },
     text: (t) => sweep('square', 520, 500, t, 0.03, 0.045, sfxBus),
@@ -603,7 +727,7 @@
       noise(t, 0.12, 0.25, 'bandpass', 200, 1200, sfxBus, 1);
       noise(t + 0.08, 0.45, 0.3, 'lowpass', 500, 2500, sfxBus, 0.8, 0.15);
       sweep('sawtooth', 70, 140, t + 0.08, 0.4, 0.06, sfxBus, 0.1);
-      for (let i = 0; i < 10; i++) noise(t + 0.08 + i * 0.035 + Math.random() * 0.02, 0.025, 0.12, 'highpass', 2500 + Math.random() * 3000, 3000, sfxBus);
+      for (let i = 0; i < 10; i++) noise(t + 0.08 + i * 0.035 + rnd() * 0.02, 0.025, 0.12, 'highpass', 2500 + rnd() * 3000, 3000, sfxBus);
     },
     imp_punch(t) {
       kick(t, 0.7, sfxBus);
@@ -614,7 +738,7 @@
       kick(t, 0.9, sfxBus);
       noise(t, 1.0, 0.45, 'lowpass', 2400, 80, sfxBus);
       noise(t, 0.4, 0.2, 'bandpass', 900, 300, sfxBus, 1);
-      for (let i = 0; i < 12; i++) noise(t + 0.1 + i * 0.05 + Math.random() * 0.03, 0.03, 0.1, 'highpass', 3000 + Math.random() * 3000, 3000, sfxBus);
+      for (let i = 0; i < 12; i++) noise(t + 0.1 + i * 0.05 + rnd() * 0.03, 0.03, 0.1, 'highpass', 3000 + rnd() * 3000, 3000, sfxBus);
     },
     imp_ace(t) {
       kick(t, 0.4, sfxBus);
@@ -625,7 +749,7 @@
       kick(t, 0.55, sfxBus);
       noise(t, 0.9, 0.32, 'bandpass', 1800, 500, sfxBus, 1.2);
       for (let i = 0; i < 9; i++) noise(t + i * 0.07, 0.1, 0.22, 'highpass', 6500, 1500, sfxBus, 2);
-      for (let i = 0; i < 14; i++) noise(t + 0.05 + i * 0.045, 0.05, 0.1, 'bandpass', 3500 + Math.random() * 3000, 2500, sfxBus, 3);
+      for (let i = 0; i < 14; i++) noise(t + 0.05 + i * 0.045, 0.05, 0.1, 'bandpass', 3500 + rnd() * 3000, 2500, sfxBus, 3);
     },
     imp_beam(t) {
       kick(t, 0.6, sfxBus);
@@ -665,7 +789,7 @@
       noise(t + 0.4, 1.4, 0.2, 'lowpass', 200, 700, sfxBus, 1, 0.2);
       sweep('sine', 180, 520, t, 0.45, 0.04, sfxBus, 0.4);
       for (let i = 0; i < 28; i++) {
-        noise(t + 0.08 + i * 0.055 + Math.random() * 0.03, 0.07, 0.13, 'bandpass', 3000 + Math.random() * 3500, 2000, sfxBus, 3);
+        noise(t + 0.08 + i * 0.055 + rnd() * 0.03, 0.07, 0.13, 'bandpass', 3000 + rnd() * 3500, 2000, sfxBus, 3);
       }
     },
     beam(t) {
@@ -683,6 +807,191 @@
       noise(t + 0.3, 0.5, 0.18, 'highpass', 1500, 600, sfxBus);
     },
     gust: (t) => noise(t, 1.0, 0.32, 'bandpass', 300, 2500, sfxBus, 1.2, 0.5),
+    slash(t) {
+      sweep('sine', 1800, 300, t, 0.14, 0.06, sfxBus);
+      noise(t, 0.12, 0.2, 'highpass', 6000, 2000, sfxBus);
+      sweep('sine', 300, 1800, t + 0.16, 0.12, 0.06, sfxBus);
+      noise(t + 0.16, 0.1, 0.18, 'highpass', 2000, 7000, sfxBus);
+    },
+    imp_slash(t) {
+      noise(t, 0.09, 0.32, 'highpass', 7000, 2500, sfxBus, 1.5);
+      voice('bell', 98 + Math.floor(rnd() * 3), t, 0.1, 0.05, sfxBus);
+      kick(t, 0.35, sfxBus);
+    },
+    oblivion(t) {
+      sweep('sawtooth', 55, 40, t, 1.2, 0.08, sfxBus, 0.3);
+      noise(t, 1.2, 0.15, 'lowpass', 300, 900, sfxBus, 1, 0.8);
+      timp(t, 0.7, sfxBus, 42);
+    },
+    clank(t) {
+      noise(t, 0.08, 0.3, 'bandpass', 3000, 1500, sfxBus, 3);
+      voice('bell', 74, t, 0.1, 0.04, sfxBus);
+      noise(t + 0.09, 0.06, 0.2, 'bandpass', 2500, 1200, sfxBus, 3);
+    },
+    shine(t) {
+      bells(t, [96, 103], 0.07, 0.09);
+      sweep('sine', 2000, 5000, t, 0.4, 0.04, sfxBus);
+      noise(t, 0.5, 0.08, 'highpass', 7000, 10000, sfxBus, 1, 0.05);
+    },
+    leap(t) {
+      noise(t, 0.45, 0.35, 'bandpass', 400, 3500, sfxBus, 1);
+      sweep('sine', 200, 1200, t, 0.4, 0.06, sfxBus);
+    },
+    plunge(t) {
+      sweep('sine', 2400, 200, t, 0.35, 0.08, sfxBus);
+      noise(t, 0.35, 0.3, 'bandpass', 4000, 500, sfxBus, 1, 0.2);
+    },
+    bow(t) {
+      noise(t, 0.3, 0.12, 'bandpass', 600, 1200, sfxBus, 4, 0.25);
+      sweep('triangle', 120, 180, t, 0.3, 0.04, sfxBus, 0.25);
+    },
+    drawBow(t) {
+      noise(t, 0.5, 0.14, 'bandpass', 500, 1400, sfxBus, 5, 0.45);
+      sweep('triangle', 100, 220, t, 0.5, 0.05, sfxBus, 0.45);
+    },
+    twang(t) {
+      sweep('triangle', 220, 110, t, 0.25, 0.12, sfxBus);
+      noise(t, 0.18, 0.25, 'bandpass', 3000, 6000, sfxBus, 1);
+    },
+    imp_bow(t) {
+      kick(t, 0.8, sfxBus);
+      noise(t, 0.08, 0.4, 'highpass', 6000, 2000, sfxBus, 1.5);
+      noise(t, 0.3, 0.25, 'lowpass', 1500, 200, sfxBus);
+      sweep('square', 900, 120, t, 0.18, 0.05, sfxBus);
+    },
+    rain(t) {
+      sweep('sawtooth', 60, 50, t, 1.0, 0.07, sfxBus, 0.3);
+      timp(t, 0.6, sfxBus, 48);
+    },
+    flameOn(t) {
+      noise(t, 0.6, 0.3, 'bandpass', 300, 1500, sfxBus, 1, 0.1);
+      sweep('sawtooth', 80, 160, t, 0.5, 0.05, sfxBus);
+    },
+    arrowsUp(t) {
+      for (let i = 0; i < 12; i++) noise(t + i * 0.04, 0.2, 0.14, 'bandpass', 1500 + rnd() * 2000, 5000, sfxBus, 3);
+      SFX.twang(t);
+    },
+    imp_rain(t) {
+      kick(t, 0.5, sfxBus);
+      noise(t, 0.35, 0.3, 'lowpass', 2000, 200, sfxBus);
+      noise(t, 0.06, 0.25, 'highpass', 5000, 2000, sfxBus, 1.5);
+    },
+    boing(t) {
+      sweep('sine', 160, 720, t, 0.12, 0.12, sfxBus);
+      sweep('sine', 720, 300, t + 0.12, 0.2, 0.08, sfxBus);
+      sweep('triangle', 300, 520, t + 0.32, 0.12, 0.05, sfxBus);
+    },
+    honk(t) {
+      sweep('sawtooth', 330, 300, t, 0.12, 0.08, sfxBus);
+      sweep('square', 335, 305, t, 0.12, 0.04, sfxBus);
+      sweep('sawtooth', 250, 220, t + 0.15, 0.18, 0.08, sfxBus);
+    },
+    laugh(t) {
+      for (let i = 0; i < 5; i++) sweep('square', 820 - i * 60, 600 - i * 60, t + i * 0.09, 0.07, 0.05, sfxBus);
+    },
+    jingle(t) {
+      [72, 74, 76, 77, 79, 77, 76, 74].forEach((m, i) => voice('bell', m, t + i * 0.09, 0.12, 0.06, sfxBus));
+    },
+    shuffle(t) {
+      for (let i = 0; i < 8; i++) noise(t + i * 0.035, 0.03, 0.12, 'bandpass', 3500, 2500, sfxBus, 2);
+    },
+    cardFlip(t) {
+      noise(t, 0.05, 0.2, 'highpass', 4000, 3000, sfxBus, 1);
+      sweep('square', 600, 900, t, 0.05, 0.04, sfxBus);
+    },
+    safe(t) {
+      bells(t, [72, 76, 79, 84], 0.08, 0.08);
+      chordV('square', t + 0.32, [72, 76, 79], 0.5, 0.04);
+    },
+    rumble(t) {
+      noise(t, 0.9, 0.35, 'lowpass', 160, 60, sfxBus);
+      sweep('sawtooth', 45, 38, t, 0.9, 0.08, sfxBus);
+      kick(t, 0.4, sfxBus);
+    },
+    beamDown(t) {
+      sweep('sawtooth', 1600, 120, t, 0.6, 0.05, sfxBus);
+      sweep('sine', 110, 112, t + 0.4, 2.5, 0.08, sfxBus, 0.5);
+      noise(t, 0.6, 0.12, 'highpass', 4000, 8000, sfxBus);
+    },
+    liftOff(t) {
+      sweep('sine', 120, 900, t, 2.4, 0.08, sfxBus, 0.6);
+      sweep('square', 240, 1800, t, 2.4, 0.025, sfxBus, 0.6);
+    },
+    digital(t) {
+      for (let i = 0; i < 4; i++) sweep('square', 1500 + rnd() * 1500, 1500 + rnd() * 1500, t + i * 0.06, 0.03, 0.025, sfxBus);
+    },
+    beep: (t) => sweep('square', 1200, 1200, t, 0.025, 0.035, sfxBus),
+    glitch(t) {
+      for (let i = 0; i < 6; i++) sweep('square', 200 + rnd() * 2000, 100 + rnd() * 1500, t + i * 0.04, 0.035, 0.04, sfxBus);
+      noise(t, 0.25, 0.12, 'highpass', 3000, 6000, sfxBus);
+    },
+    swoosh(t) {
+      noise(t, 0.3, 0.2, 'bandpass', 600, 4000, sfxBus, 1.5);
+      sweep('sine', 200, 900, t, 0.25, 0.05, sfxBus);
+    },
+    goldify(t) {
+      for (let i = 0; i < 10; i++) voice('bell', 76 + (i % 5) * 3 + Math.floor(i / 5) * 12, t + i * 0.12, 0.25, 0.04, sfxBus);
+      sweep('triangle', 300, 1200, t, 1.3, 0.04, sfxBus);
+    },
+    kpunch: (t) => sweep('square', 500, 200, t, 0.12, 0.05, sfxBus),
+    midas(t) {
+      chordV('brass', t, [55, 62, 67], 0.6, 0.05);
+      bells(t + 0.1, [79, 83, 86], 0.08, 0.05);
+    },
+    throne(t) {
+      chordV('brass', t, [48, 55, 60, 64], 0.7, 0.06);
+      timp(t, 0.8, sfxBus, 48);
+    },
+    grail(t) {
+      chordV('choir', t, [60, 64, 67, 72], 1.2, 0.05);
+      bells(t + 0.2, [84, 88, 91, 96], 0.1, 0.06);
+    },
+    imp_kpunch(t) {
+      kick(t, 0.7, sfxBus);
+      noise(t, 0.12, 0.25, 'lowpass', 2500, 400, sfxBus);
+      voice('bell', 84, t, 0.2, 0.04, sfxBus);
+    },
+    imp_midas(t) {
+      megaBoom(t);
+      bells(t + 0.05, [96, 91, 88, 84, 79], 0.05, 0.06);
+    },
+    imp_throne(t) {
+      megaBoom(t);
+      noise(t, 0.5, 0.3, 'lowpass', 900, 100, sfxBus);
+    },
+    imp_grail(t) {
+      kick(t, 0.6, sfxBus);
+      noise(t, 0.15, 0.3, 'lowpass', 2500, 400, sfxBus);
+    },
+    glove: (t) => SFX.laugh(t),
+    jack(t) {
+      sweep('sine', 900, 200, t, 0.35, 0.06, sfxBus);
+      SFX.laugh(t + 0.2);
+    },
+    cards(t) {
+      SFX.laugh(t);
+      sweep('sawtooth', 120, 900, t + 0.3, 0.5, 0.05, sfxBus);
+      SFX.jingle(t + 0.6);
+    },
+    imp_glove(t) {
+      kick(t, 0.6, sfxBus);
+      SFX.honk(t + 0.02);
+      noise(t, 0.12, 0.25, 'lowpass', 2000, 300, sfxBus);
+    },
+    imp_jack(t) {
+      explode(t, 0.7);
+      SFX.laugh(t + 0.1);
+    },
+    imp_cards(t) {
+      explode(t, 0.9);
+      crash(t, 0.15, sfxBus);
+    },
+    imp_oblivion(t) {
+      megaBoom(t);
+      noise(t, 0.2, 0.35, 'highpass', 8000, 2500, sfxBus);
+      chordV('brass', t + 0.05, [40, 47, 52], 0.9, 0.08);
+      for (let i = 0; i < 10; i++) noise(t + 0.15 + i * 0.06, 0.05, 0.12, 'bandpass', 2000 + rnd() * 4000, 1200, sfxBus, 3);
+    },
     spot(t) {
       sweep('sine', 200, 1600, t, 0.85, 0.07, sfxBus, 0.8);
       noise(t, 0.85, 0.08, 'highpass', 3000, 9000, sfxBus, 1, 0.8);
@@ -785,6 +1094,27 @@
       chordV('choir', t, [62, 65, 69], 1.4, 0.06);
       sweep('sine', 400, 150, t + 0.3, 1.4, 0.06, sfxBus);
     },
+    vines(t) {
+      for (let i = 0; i < 6; i++) noise(t + i * 0.09, 0.05, 0.25, 'highpass', 2500, 2500, sfxBus, 1);
+      noise(t, 1.2, 0.3, 'bandpass', 2500, 800, sfxBus, 1.5, 0.2);
+      for (let i = 0; i < 20; i++) noise(t + 0.1 + i * 0.05 + rnd() * 0.03, 0.06, 0.12, 'bandpass', 3000 + rnd() * 3000, 2000, sfxBus, 3);
+      kick(t + 0.9, 0.6, sfxBus);
+      noise(t + 0.9, 0.5, 0.3, 'lowpass', 800, 150, sfxBus);
+      kick(t + 1.15, 0.4, sfxBus);
+    },
+    heartbeat(t) {
+      sweep('sine', 70, 40, t, 0.16, 0.7, sfxBus);
+      sweep('sine', 64, 38, t + 0.2, 0.14, 0.45, sfxBus);
+    },
+    knock(t) {
+      megaBoom(t);
+      sweep('square', 500, 50, t + 0.05, 0.8, 0.07, sfxBus);
+      noise(t, 0.9, 0.3, 'bandpass', 3000, 200, sfxBus, 1);
+    },
+    wake(t) {
+      chordV('choir', t, [62, 66, 69, 74], 2.5, 0.04);
+      bells(t + 0.3, [86, 81, 78, 74], 0.25, 0.04);
+    },
     finalBoom(t) {
       megaBoom(t);
       chordV('choir', t + 0.2, [50, 57, 62, 66, 69, 74], 4, 0.05);
@@ -826,5 +1156,15 @@
     return muted;
   }
 
-  window.Sound = { play, music: setMusic, toggleMute, isMuted: () => muted };
+  function stream() {
+    init();
+    if (!ctx || !outNode) return null;
+    if (!recDest) {
+      recDest = ctx.createMediaStreamDestination();
+      outNode.connect(recDest);
+    }
+    return recDest.stream;
+  }
+
+  window.Sound = { play, music: setMusic, toggleMute, isMuted: () => muted, stream };
 })();
