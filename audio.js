@@ -231,6 +231,18 @@
 
   const CRASH8 = ['x...............', '', '', '', 'x...............', '', '', ''];
   const ROLL8 = ['', '', '', '', '', '', '', 'x.x.x.x.xxxxxxxx'];
+  const SC = {
+    pentaMin: [0, 3, 5, 7, 10],
+    lydian: [0, 2, 4, 6, 7, 9, 11],
+    mixo: [0, 2, 4, 5, 7, 9, 10],
+    dorian: [0, 2, 3, 5, 7, 9, 10],
+    aeolian: [0, 2, 3, 5, 7, 8, 10],
+    harmMin: [0, 2, 3, 5, 7, 8, 11],
+    phrygian: [0, 1, 3, 5, 7, 8, 10],
+    phrygDom: [0, 1, 4, 5, 7, 8, 10],
+    blues: [0, 3, 5, 6, 7, 10],
+    major: [0, 2, 4, 5, 7, 9, 11],
+  };
   const TRACKS = {
     grasslands: {
       bpm: 120, prog: 'G D Em C G D C D',
@@ -347,81 +359,82 @@
       ],
       drums: { p: ['x...............', '........x.......'] },
     },
+    // Fiery punk: power-chord stabs, offbeat "oom-pa" snare, minor pentatonic riffs.
     battle_redKid: {
-      bpm: 156, prog: 'Am F G Am Am F G E',
+      bpm: 172, prog: 'E5 E5 C5 D5 E5 G5 A5 B5', key: 4, scale: SC.pentaMin,
       parts: [
-        { kind: 'bass', inst: 'bass', pat: 'x.x.o.x.x.x.o.x.', vol: 0.3 },
-        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.045 },
-        { kind: 'pad', inst: 'brass', pat: 'x.....x.....x...', vol: 0.03, len: 0.5 },
-        { kind: 'tone', inst: 'stacc', pat: '0.1.2.1.0.1.2.1.', vol: 0.03 },
+        { kind: 'bass', inst: 'bass', pat: 'x.x.x.x.x.x.x.x.', vol: 0.3, len: 0.6 },
+        { kind: 'pad', inst: 'saw', pat: 'x..x..x...x..x..', vol: 0.035, len: 0.45 },
         {
           kind: 'tone', inst: 'square', vol: 0.06,
-          pat: ['2.3.4---2.3.4---', '5.4.3.2.3-------', '3.4.5---3.4.5---', '6.5.4.3.4---4---', '4-------5---6---', '5-------4---3---', '4---5---6---7---', '6---------------'],
+          pat: ['0.0.2.3-4-3-2---', '0.0.2.3-2-------', '5-4-3-2-3-4-5---', '7---6---5---4---', '0.0.2.3-4-3-2---', '5-5-6-7-6-5-4---', '3-4-5-6-7-------', '9-------7---5---'],
         },
       ],
-      drums: { k: 'x...x...x...x...', s: '....x.......x...', h: 'xxxxxxxxxxxxxxxx', T: ['', '', '', 'x.......x.x.x.x.'], c: CRASH8, p: ROLL8 },
-      dv: { h: 0.03 },
+      drums: { k: 'x...x...x...x...', s: '..x...x...x...x.', h: 'x.x.x.x.x.x.x.x.', c: CRASH8 },
+      dv: { h: 0.035, s: 0.17 },
     },
+    // Jungle shuffle: swung bongos and shakers, no snare, bouncy marimba hook.
     battle_monkey: {
-      bpm: 164, prog: 'Gm Gm Eb F Gm Gm Eb D',
+      bpm: 128, swing: 0.3, prog: 'Gm Gm C Gm Gm Gm D C', key: 7, scale: SC.pentaMin,
       parts: [
-        { kind: 'bass', inst: 'tri', pat: 'x..x..x...x.x...', vol: 0.36 },
-        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.03 },
-        { kind: 'pad', inst: 'brass', pat: 'x.....x.....x...', vol: 0.03, len: 0.5 },
+        { kind: 'bass', inst: 'tri', pat: 'x..x..x.x.o.x...', vol: 0.36 },
+        { kind: 'tone', inst: 'marimba', pat: '0.2.1.2.0.2.3.2.', vol: 0.13 },
         {
-          kind: 'tone', inst: 'marimba', vol: 0.26,
-          pat: ['4.5.4.2.3-2-----', '4.5.6.5.4-------', '4.5.4.2.3-2-0---', '1---2---3-------', '4.4.5.4.3.3.2.2.', '3.3.4.3.2-------', '4.5.6.5.4.3.2.1.', '2---------------'],
+          kind: 'tone', inst: 'marimba', oct: 1, vol: 0.24,
+          pat: ['0.2.3.4.3.2.0...', '3.4.5---3.2.0---', '0.2.3.4.5.6.5...', '4---3---2-------', '5.5.4.4.3.3.2.2.', '3.2.0---2.3.4---', '5.6.7.6.5.4.3.2.', '0---------------'],
         },
+        { kind: 'tone', inst: 'flute', oct: 1, vol: 0.05, pat: ['', '', '', '', '7-------6-------', '5-------4-------', '5---6---7-------', '5---------------'] },
       ],
-      drums: { k: 'x.....x...x.....', s: '....x.......x...', t: 'x.xx.x.xx.x.x.xx', h: 'xxxxxxxxxxxxxxxx', T: 'x.......x.......', c: CRASH8, p: ROLL8 },
-      dv: { t: 0.16, h: 0.025, T: 0.4 },
+      drums: { k: 'x.........x.....', T: 'x.....x...x.....', t: '..x.x...x.xx..x.', h: 'xxxxxxxxxxxxxxxx', c: CRASH8 },
+      dv: { t: 0.2, h: 0.03, T: 0.38 },
     },
+    // Heavenly waltz in 3/4: choir, flowing harp, bright Lydian melody, timpani on the downbeat.
     battle_angel: {
-      bpm: 144, prog: 'Dm Bb Gm A Dm Bb C A',
+      bpm: 172, steps: 12, prog: 'F G Em Am F G C C', key: 5, scale: SC.lydian,
       parts: [
-        { kind: 'bass', inst: 'bass', pat: 'x.....x.x.....x.', vol: 0.28 },
-        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.06 },
-        { kind: 'tone', inst: 'harp', pat: '0123432101234321', vol: 0.07 },
+        { kind: 'bass', inst: 'tri', pat: 'x-----------', vol: 0.32 },
+        { kind: 'pad', inst: 'choir', pat: 'x-----------', vol: 0.055 },
+        { kind: 'pad', inst: 'strings', pat: '....x...x...', vol: 0.035, len: 0.5 },
+        { kind: 'tone', inst: 'harp', pat: '0.1.2.3.2.1.', vol: 0.07 },
         {
-          kind: 'tone', inst: 'brass', vol: 0.09,
-          pat: ['3-----4-5-------', '4---3---2-------', '2-----3-4-------', '3---------------', '5-----4-3-------', '4---5---6-------', '5---4---3---2---', '3---------------'],
+          kind: 'tone', inst: 'flute', oct: 1, vol: 0.085,
+          pat: ['4-----5-6---', '5-----4-----', '2-----3-4---', '3-----------', '4-----5-6---', '7-----6-5---', '6---5---4---', '4-----------'],
         },
+        { kind: 'tone', inst: 'bell', oct: 2, vol: 0.03, pat: ['4-----------', '', '2-----------', '', '4-----------', '7-----------', '6-----------', '4-----------'] },
       ],
-      drums: { k: 'x.......x..x....', s: '....x.......x...', h: '..x...x...x...x.', T: 'x.......x.......', c: CRASH8, p: ROLL8 },
-      dv: { T: 0.4 },
+      drums: { p: 'x...........', h: '....x...x...', c: CRASH8 },
+      dv: { p: 0.35, h: 0.03 },
     },
+    // Soaring sky chase: fast Mixolydian flute runs over shimmering wind arps and syncopated kicks.
     battle_skyBird: {
-      bpm: 176, prog: 'Em C D B Em C Am B',
+      bpm: 188, prog: 'D C G D D C Em A', key: 2, scale: SC.mixo,
       parts: [
-        { kind: 'bass', inst: 'bass', pat: 'xoxoxoxoxoxoxoxo', vol: 0.24, len: 0.7 },
-        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.05 },
-        { kind: 'tone', inst: 'stacc', pat: '0123012301230123', vol: 0.028 },
+        { kind: 'bass', inst: 'bass', pat: 'x.ox.ox.x.ox.oxo', vol: 0.24, len: 0.6 },
+        { kind: 'pad', inst: 'strings', pat: 'x-------x-------', vol: 0.04 },
+        { kind: 'tone', inst: 'stacc', oct: 1, pat: '0123432101234321', vol: 0.022 },
         {
-          kind: 'tone', inst: 'square', vol: 0.06,
-          pat: ['4-4-5-6---5-4---', '3-------2-------', '4-4-5-6---7-6---', '5-------4---3---', '6---5---4---3---', '4---5---6-------', '4---3---2---1---', '2---------------'],
-        },
-        {
-          kind: 'tone', inst: 'horn', oct: -1, vol: 0.06,
-          pat: ['4-4-5-6---5-4---', '3-------2-------', '4-4-5-6---7-6---', '5-------4---3---', '6---5---4---3---', '4---5---6-------', '4---3---2---1---', '2---------------'],
+          kind: 'tone', inst: 'flute', oct: 1, vol: 0.09,
+          pat: ['4-5-7---6-5-4---', '3-------2-------', '4-5-7---9---8---', '7---------------', '7-8-9-8-7-6-5---', '6---5---4-------', '4-5-6-7-6-5-4-2-', '1---------------'],
         },
       ],
-      drums: { k: 'x.x...x.x.x...x.', s: '....x.......x.x.', h: 'x.x.x.x.x.x.x.x.', T: 'x.......x.......', c: CRASH8, p: ROLL8 },
-      dv: { T: 0.4 },
+      drums: { k: 'x..x..x...x..x..', s: '....x.......x...', o: '..x...x...x...x.', h: '.x.x.x.x.x.x.x.x', c: CRASH8 },
+      dv: { h: 0.025, o: 0.05 },
     },
+    // Medieval war march: military snare rolls, root-fifth bass, heroic horn fanfare.
     battle_knight: {
-      bpm: 152, prog: 'Em C Am B Em C D B',
+      bpm: 132, prog: 'Em D C B Em G D B', key: 4, scale: SC.aeolian,
       parts: [
-        { kind: 'bass', inst: 'bass', pat: 'x.xox.xox.xox.xo', vol: 0.27, len: 0.7 },
-        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.05 },
-        { kind: 'pad', inst: 'brass', pat: 'x..x..x.x..x..x.', vol: 0.03, len: 0.4 },
-        { kind: 'tone', inst: 'stacc', pat: '0.1.2.0.1.2.0.1.', vol: 0.032 },
+        { kind: 'bass', inst: 'bass', pat: 'x...5...x...5...', vol: 0.3, len: 0.5 },
+        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.045 },
+        { kind: 'tone', inst: 'pluck', pat: '0.2.1.2.0.2.1.2.', vol: 0.045 },
         {
           kind: 'tone', inst: 'horn', vol: 0.11,
-          pat: ['2---3-4-5-------', '4---3---2-------', '2---3-4-5---6---', '5---------------', '6---5---4---5---', '4---3---2-------', '3---4---5---6---', '5---------------'],
+          pat: ['0---0-2-4-------', '3---2---1-------', '0---0-2-4---5---', '4---------------', '7---6-5-4---5---', '6---5---4-------', '4---5---6---5---', '4-------2-------'],
         },
+        { kind: 'tone', inst: 'brass', oct: -1, vol: 0.05, pat: ['0-------', '', '0-------', '', '4-------', '3-------', '4-------', '4-------'] },
       ],
-      drums: { k: 'x...x...x...x...', s: '..x...x.x.x...xx', h: 'x.x.x.x.x.x.x.x.', T: 'x.......x.......', c: CRASH8, p: ROLL8 },
-      dv: { s: 0.18, h: 0.025, T: 0.4 },
+      drums: { k: 'x.......x.......', s: ['x.xxx.x.x.xxx.x.', 'x.xxx.x.x.x.xxxx'], T: 'x.......x.......', c: CRASH8 },
+      dv: { s: 0.1, T: 0.35 },
     },
     maze: {
       bpm: 96, prog: 'Am Am F E Dm Am E E',
@@ -465,70 +478,347 @@
       drums: { k: 'x.......x.......', s: '....x.......x...', h: '..x...x...x...x.' },
       dv: { h: 0.02, s: 0.12 },
     },
+    // Baroque royal court: harpsichord 16ths, walking continuo bass, trumpet fanfare, timpani instead of a drum kit.
     battle_king: {
-      bpm: 132, prog: 'Cm Ab Eb Bb Cm Fm G G',
+      bpm: 124, prog: 'Cm Fm G Cm Ab Fm G C', key: 0, scale: SC.harmMin,
       parts: [
-        { kind: 'bass', inst: 'bass', pat: 'x..xx..xx..xx.x.', vol: 0.28 },
-        { kind: 'pad', inst: 'organ', pat: 'x---------------', vol: 0.06 },
-        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.035 },
-        { kind: 'tone', inst: 'harp', pat: '0.1.2.3.2.1.0.1.', vol: 0.05 },
+        { kind: 'bass', inst: 'bass', pat: 'x.o.x.o.x.o.x.o.', vol: 0.24, len: 0.6 },
+        { kind: 'pad', inst: 'organ', pat: 'x-------x-------', vol: 0.05 },
+        { kind: 'tone', inst: 'pluck', oct: 1, pat: '0121012101210121', vol: 0.04 },
         {
-          kind: 'tone', inst: 'brass', vol: 0.08,
-          pat: ['4---3-2-4-------', '5---4---3-------', '6---5-4-3---2---', '4---------------', '4---3-2-4---5---', '6---5---4-------', '3---4---5---6---', '7---------------'],
+          kind: 'tone', inst: 'brass', vol: 0.085,
+          pat: ['4-4-4-7-------6-', '5-------3-------', '4---5---6---7---', '7-------6-------', '2-3-4-2-0-------', '5---4---3---2---', '1---2---3-6-5---', '7---------------'],
         },
       ],
-      drums: { k: 'x...x...x.x.x...', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', T: 'x.......x.......', c: CRASH8, p: ROLL8 },
-      dv: { T: 0.45 },
+      drums: { p: 'x.....x.x.......', s: ['', '', '', '', '', '', '', 'x.x.x.x.xxxxxxxx'], c: CRASH8 },
+      dv: { p: 0.4, s: 0.12 },
     },
-    battle_joker: {
-      bpm: 176, prog: 'C G C G F C G C',
+    ufo: {
+      bpm: 104, prog: 'Em C Am B Em C D B',
       parts: [
-        { kind: 'bass', inst: 'bass', pat: 'x...o...x...o...', vol: 0.28, len: 0.5 },
-        { kind: 'tone', inst: 'organ', pat: '....012.....012.', vol: 0.05, len: 0.5 },
+        { kind: 'bass', inst: 'bass', pat: 'x..x..x.x..x..x.', vol: 0.22 },
+        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.035 },
+        { kind: 'tone', inst: 'bell', oct: 1, pat: '0.2.4.2.0.2.4.6.', vol: 0.035 },
         {
-          kind: 'tone', inst: 'square', oct: 1, vol: 0.05, len: 0.6,
-          pat: ['4321234-4321234-', '5-4-3-2-1-------', '4321234-4321234-', '5-6-7-----------', '6543456-6543456-', '4-3-2-1-0-------', '4-4-5-5-6-6-7---', '7---0-----------'],
-        },
-        {
-          kind: 'tone', inst: 'pluck', vol: 0.05,
-          pat: '0.2.4.2.0.2.4.2.',
+          kind: 'tone', inst: 'sine', oct: 1, vol: 0.06,
+          pat: ['4-------3---2---', '0---------------', '2---3---4---5---', '6---------------', '4-------5---6---', '7---6---5-------', '4---3---2---1---', '0---------------'],
         },
       ],
-      drums: { k: 'x...x...x...x...', s: '..x...x...x...x.', h: 'xxxxxxxxxxxxxxxx', c: CRASH8, p: ROLL8 },
-      dv: { h: 0.02 },
+      drums: { k: 'x.......x.......', s: '....x.......x...', h: 'x.xxx.xxx.xxx.xx' },
+      dv: { h: 0.018, s: 0.1 },
     },
-    battle_archer: {
-      bpm: 160, prog: 'Dm Bb F C Dm Bb Gm A',
+    mech: {
+      bpm: 96, prog: 'Am F G Em Am F E E',
       parts: [
-        { kind: 'bass', inst: 'bass', pat: 'x.xox.xox.xox.xo', vol: 0.26, len: 0.7 },
-        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.05 },
-        { kind: 'tone', inst: 'pluck', pat: '0123210101232101', vol: 0.055 },
+        { kind: 'bass', inst: 'bass', pat: 'x...x.x.x...x.x.', vol: 0.24 },
+        { kind: 'pad', inst: 'organ', pat: 'x-------x-------', vol: 0.035 },
+        { kind: 'tone', inst: 'marimba', pat: '0.1.2...0.1.2...', vol: 0.05 },
+      ],
+      drums: { k: 'x.......x.......', T: '....x.......x...', h: '..x...x...x...x.' },
+      dv: { h: 0.02, T: 0.25 },
+    },
+    captain: {
+      bpm: 84, prog: 'Dm Bb Gm A Dm Bb Gm A',
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x.......x...x...', vol: 0.24 },
+        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.03 },
+        { kind: 'pad', inst: 'organ', pat: 'x-------x-------', vol: 0.035 },
+        { kind: 'tone', inst: 'bell', pat: '0...2...4...2...', vol: 0.035 },
         {
-          kind: 'tone', inst: 'flute', oct: 1, vol: 0.08,
-          pat: ['4-3-2-1-2---4---', '5---4---3-------', '4-3-2-1-2---5---', '6---------------', '7---6---5---4---', '5---4---3-------', '4---5---6---5---', '4---------------'],
-        },
-        {
-          kind: 'tone', inst: 'horn', vol: 0.07,
-          pat: ['2-------3-------', '4-------3-------', '2-------3-------', '4---------------', '5-------4-------', '3-------2-------', '3-------4-------', '3---------------'],
+          kind: 'tone', inst: 'horn', vol: 0.06,
+          pat: ['4-------3-------', '2-------1-------', '4---5---6---5---', '4---------------', '4-------5-------', '6---5---4-------', '3---2---1---2---', '0---------------'],
         },
       ],
-      drums: { k: 'x...x.x.x...x...', s: '....x.......x..x', h: 'x.x.x.x.x.x.x.x.', T: 'x.......x.......', c: CRASH8, p: ROLL8 },
-      dv: { T: 0.4 },
+      drums: { k: 'x.......x.......', T: '....x.......x.x.', h: '..x...x...x...x.' },
+      dv: { h: 0.02, T: 0.3 },
     },
-    battle_lightGods: {
-      bpm: 136, prog: 'Cm Ab Fm G Cm Ab Bb G',
+    // Industrial workshop funk: swung slap bass, offbeat synth stabs, clanking toms, bluesy saw lead.
+    battle_mechanic: {
+      bpm: 118, swing: 0.18, prog: 'Am Am C D Am Am F E', key: 9, scale: SC.blues,
       parts: [
-        { kind: 'bass', inst: 'bass', pat: 'x..x..x.x..x..x.', vol: 0.28 },
-        { kind: 'pad', inst: 'organ', pat: 'x---------------', vol: 0.07 },
+        { kind: 'bass', inst: 'bass', pat: 'x..x.xo.x..x.x.o', vol: 0.32, len: 0.5 },
+        { kind: 'pad', inst: 'supersaw', pat: '....x.......x...', vol: 0.03, len: 0.3 },
+        { kind: 'tone', inst: 'pluck', pat: '0.3.0.3.2.3.0.3.', vol: 0.04 },
+        {
+          kind: 'tone', inst: 'saw', vol: 0.06,
+          pat: ['0-2-3-4-3-2-0---', '5---4---3---2---', '0-2-3-4-5-4-3---', '2-------0-------', '5-6-7-6-5-4-3---', '4---3---2---3---', '5-5-4-4-3-3-2-2-', '0---------------'],
+        },
+      ],
+      drums: { k: 'x..x..x...x..x..', s: '....x.......x...', t: '......x.......x.', o: '..x...x...x...x.', h: 'x.x.x.x.x.x.x.x.' },
+      dv: { t: 0.14, h: 0.025, o: 0.04 },
+    },
+    // Space opera: relentless 16th ostinato, half-time drums, choir and a commanding brass theme.
+    battle_captain: {
+      bpm: 148, prog: 'Dm Bb Gm A Dm Bb Eb A', key: 2, scale: SC.harmMin,
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'xxxxxxxxxxxxxxxx', vol: 0.22, len: 0.4 },
         { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.05 },
-        { kind: 'tone', inst: 'bell', pat: '0.1.2.1.0.1.2.1.', oct: 1, vol: 0.04 },
+        { kind: 'pad', inst: 'supersaw', pat: 'x---------------', vol: 0.022 },
+        { kind: 'tone', inst: 'bell', oct: 1, pat: '0...1...2...1...', vol: 0.04 },
         {
           kind: 'tone', inst: 'brass', vol: 0.09,
-          pat: ['2-------3---2---', '1-------0-------', '2-------3---4---', '3---------------', '4-------5---4---', '3-------2-------', '3---4---5---4---', '3---------------'],
+          pat: ['0-----4-------3-', '4-------1-------', '2---3---4---5---', '6-------4-------', '7-----6---5---4-', '5-------3-------', '4---3---2---1---', '6---------------'],
+        },
+        { kind: 'tone', inst: 'horn', oct: -1, vol: 0.06, pat: ['0-------', '', '2-------', '', '0-------4-------', '5-------', '4-------2-------', '1---------------'] },
+      ],
+      drums: { k: 'x.........x.....', s: '........x.......', T: 'x.......x.....x.', h: 'x.x.x.x.x.x.x.x.', c: CRASH8 },
+      dv: { T: 0.4, s: 0.28, h: 0.025 },
+    },
+    wreck: {
+      bpm: 78, prog: 'C#m A F#m G# C#m A D G#', glitch: true,
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x.......x..x....', vol: 0.24 },
+        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.035 },
+        { kind: 'tone', inst: 'bell', oct: 1, pat: '0...3...1...4...', vol: 0.025 },
+        {
+          kind: 'tone', inst: 'sine', vol: 0.05,
+          pat: ['4-------3-------', '2---------------', '1-------2-------', '3---------------', '4-------5-------', '4---3---2-------', '1---2---3-------', '0---------------'],
         },
       ],
-      drums: { k: 'x.......x.x.....', s: '....x.......x...', h: 'x...x...x...x...', T: 'x..x..x.........', c: CRASH8, p: ROLL8 },
-      dv: { T: 0.4 },
+      drums: { k: 'x.........x.....', T: '....x.......x...', h: '..x...x...x...x.' },
+      dv: { h: 0.015, T: 0.25 },
+    },
+    // Glitched drum & bass: broken breakbeats, long growling bass, dark Phrygian saw lead.
+    battle_brokenMech: {
+      bpm: 174, prog: 'C#m C#m D D C#m C#m A G#', glitch: true, key: 1, scale: SC.phrygian,
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x-------x--x-o--', vol: 0.3, len: 0.95 },
+        { kind: 'pad', inst: 'supersaw', pat: 'x---------------', vol: 0.024 },
+        { kind: 'tone', inst: 'square', oct: 1, vol: 0.022, pat: '0.0.4.4.0.0.5.5.' },
+        {
+          kind: 'tone', inst: 'saw', vol: 0.065,
+          pat: ['0---1---0-------', '3---1---0-------', '0---1---3---4---', '5-------4-------', '7---8---7---5---', '4---5---4---3---', '1-------0-------', '1---------------'],
+        },
+      ],
+      drums: {
+        k: ['x.........x.....', 'x.........xx....'],
+        s: ['....x..x.x..x...', '....x.......x..x'],
+        h: 'x.xxx.xxx.xxx.xx',
+        c: CRASH8,
+      },
+      dv: { h: 0.02, s: 0.22 },
+    },
+    ruins: {
+      bpm: 88, prog: 'Fm Db Bbm C Fm Db Eb C', glitch: true,
+      parts: [
+        { kind: 'bass', inst: 'tri', pat: 'x..x....x..x.o..', vol: 0.28 },
+        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.028 },
+        { kind: 'tone', inst: 'square', oct: 1, pat: '0..2..1.3..2..1.', vol: 0.022 },
+        {
+          kind: 'tone', inst: 'tri', oct: 1, vol: 0.07,
+          pat: ['2-------1---0---', '1-------2-------', '3---2---1---2---', '4---------------', '2---3---4---5---', '6-------5-------', '4---3---2---1---', '0---------------'],
+        },
+      ],
+      drums: { k: 'x.......x..x....', s: '........x.......', h: 'x.x.x.x.x.x.xxx.' },
+      dv: { h: 0.02, s: 0.12 },
+    },
+    haunt: {
+      bpm: 66, prog: 'Fm Gb Fm E', glitch: true, form: ['A', 'B'],
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x---------------', vol: 0.2 },
+        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.04 },
+        { kind: 'tone', inst: 'bell', pat: '0.......4.......', oct: 1, vol: 0.035 },
+        { kind: 'tone', inst: 'sine', oct: 2, vol: 0.025, pat: ['5-------4-------', '3---------------', '5-------6-------', '7---------------'] },
+      ],
+      drums: { p: 'x...............' },
+      dv: { p: 0.3 },
+    },
+    // Gothic ghost tarantella in 6/8: pipe organ, choir, harpsichord and an eerie Phrygian-dominant theme.
+    battle_thousandForger: {
+      bpm: 216, steps: 12, prog: 'F Gb F C F Bbm Gb C', glitch: true, key: 5, scale: SC.phrygDom,
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x..x..x..x..', vol: 0.28, len: 0.6 },
+        { kind: 'pad', inst: 'organ', pat: 'x-----------', vol: 0.05 },
+        { kind: 'pad', inst: 'choir', pat: 'x-----------', vol: 0.04 },
+        { kind: 'tone', inst: 'pluck', oct: 1, pat: '0.1.2.1.2.1.', vol: 0.04 },
+        {
+          kind: 'tone', inst: 'brass', vol: 0.085,
+          pat: ['4.5.4.3.2.1.', '2-----1-----', '4.5.4.3.4.5.', '6-----4-----', '7.8.7.6.5.4.', '5-----3-----', '4.3.2.1.2.3.', '4-----------'],
+        },
+        { kind: 'tone', inst: 'horn', oct: -1, vol: 0.05, pat: ['0-----------', '1-----------', '0-----------', '4-----------', '0-----------', '3-----------', '1-----------', '4-----------'] },
+      ],
+      drums: { T: 'x.....x.....', k: 'x..x..x..x..', s: '......x.....', h: 'x.x.x.x.x.x.', p: ['', '', '', 'x.x.x.xxxxxx'], c: CRASH8 },
+      dv: { T: 0.42, h: 0.022, s: 0.18, k: 0.35 },
+    },
+    // The long walk: a lonely, detuned drive through what's left of the world.
+    groad: {
+      bpm: 92, prog: 'Em C G D Em C Am B', glitch: true, key: 4, scale: SC.aeolian,
+      parts: [
+        { kind: 'bass', inst: 'tri', pat: 'x.......x.x.....', vol: 0.26 },
+        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.035 },
+        { kind: 'tone', inst: 'pluck', oct: 1, pat: '0...2...4...2...', vol: 0.03 },
+        {
+          kind: 'tone', inst: 'sine', vol: 0.055,
+          pat: ['4-------2---1---', '0---------------', '2-------4-------', '3---------------', '4---5---4---2---', '1-------0-------', '2---1---0---1---', '-1--------------'],
+        },
+      ],
+      drums: { k: 'x.......x.......', h: '..x...x...x...x.', p: ['', '', '', 'x...x...x.x.x.x.'] },
+      dv: { h: 0.015, p: 0.2 },
+    },
+    // Red Kid's grassland theme on a broken music box.
+    echo: {
+      bpm: 70, prog: 'G D Em C', glitch: true, noMod: true,
+      parts: [
+        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.025 },
+        { kind: 'tone', inst: 'harp', pat: '0.2.1.2.0.2.1.2.', vol: 0.03 },
+        { kind: 'tone', inst: 'bell', oct: 1, vol: 0.05, pat: ['2-1-0---1---2---', '3---2---1-------', '2-1-0---1---2-4-', '3---------------'] },
+      ],
+    },
+    // Red Kid's punk battle theme, corrupted: Phrygian lead, breakbeats and stuttering glitch.
+    battle_glitch: {
+      bpm: 186, prog: 'E5 F5 C5 D5 E5 G5 A#5 B5', glitch: true, key: 4, scale: SC.phrygian,
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x.o.x.o.xxo.x.o.', vol: 0.3, len: 0.55 },
+        { kind: 'pad', inst: 'supersaw', pat: 'x-------x-------', vol: 0.022 },
+        { kind: 'tone', inst: 'bell', oct: 1, pat: '0.4.7.4.0.4.7.4.', vol: 0.025 },
+        {
+          kind: 'tone', inst: 'square', vol: 0.06,
+          pat: ['0.0.2.3-4-3-2---', '0.0.2.3-2-------', '5-4-3-2-3-4-5---', '7---6---5---4---', '0.0.1.3-4-3-1---', '5-5-6-7-6-5-4---', '3-4-5-6-7-8-9---', '9-8-7-------0---'],
+        },
+        { kind: 'tone', inst: 'saw', oct: -1, vol: 0.035, pat: ['0-------', '', '1-------', '', '0-------', '', '4-------', '5-------'] },
+      ],
+      drums: {
+        k: ['x.....x...x.....', 'x.....x...x..x..'],
+        s: ['....x.......x...', '....x..x....x.xx'],
+        h: 'xxx.xxx.xxx.xxxx',
+        c: CRASH8,
+      },
+      dv: { h: 0.025, s: 0.2 },
+    },
+    // Chapter 7: a dead, colorless forest. Sparse plucks over a hollow drone.
+    barren: {
+      bpm: 74, prog: 'Am F Dm E Am F G E', glitch: true, key: 9, scale: SC.harmMin,
+      parts: [
+        { kind: 'bass', inst: 'tri', pat: 'x.......x.......', vol: 0.24 },
+        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.03 },
+        { kind: 'tone', inst: 'harp', pat: '0...2...1...2...', vol: 0.03 },
+        {
+          kind: 'tone', inst: 'flute', vol: 0.05,
+          pat: ['4-------3---2---', '0---------------', '1-------2---3---', '4---------------', '4---5---4---2---', '0-------1-------', '2-------1---0---', '-1--------------'],
+        },
+      ],
+      drums: { p: 'x.......x.......' },
+      dv: { p: 0.15 },
+    },
+    // The floating glitch staircase: airy rising arpeggios, the sky opening up.
+    skystairs: {
+      bpm: 84, prog: 'D E F#m G A Bm G A', glitch: true, key: 2, scale: SC.lydian,
+      parts: [
+        { kind: 'bass', inst: 'sine', pat: 'x-------x-------', vol: 0.24 },
+        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.035 },
+        { kind: 'tone', inst: 'bell', oct: 1, pat: '0.1.2.3.4.3.2.1.', vol: 0.03 },
+        {
+          kind: 'tone', inst: 'flute', oct: 1, vol: 0.05,
+          pat: ['2-------3---4---', '4-------5-------', '5---4---3---2---', '3---------------', '4---5---6---7---', '7-------6-------', '5---6---7---8---', '7---------------'],
+        },
+      ],
+      drums: { h: '..x...x...x...x.', k: 'x.......x.......' },
+      dv: { h: 0.012, k: 0.25 },
+    },
+    // The Core speaks: a cold choir and a slow, heavy heartbeat.
+    coreTheme: {
+      bpm: 60, prog: 'Cm Ab Cm G', glitch: true, noMod: true,
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x---------------', vol: 0.24 },
+        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.05 },
+        { kind: 'tone', inst: 'bell', pat: '0.......2.......', oct: 1, vol: 0.04 },
+      ],
+      drums: { k: 'x..x............' },
+      dv: { k: 0.4 },
+    },
+    // Final boss: harmonic-minor supersaw anthem with brass, choir and a relentless breakbeat.
+    battle_core: {
+      bpm: 196, prog: 'Cm Ab Fm G Cm Eb Ab G', glitch: true, key: 0, scale: SC.harmMin,
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x.xox.xox.xox.xo', vol: 0.3, len: 0.5 },
+        { kind: 'pad', inst: 'supersaw', pat: 'x-------x-------', vol: 0.03 },
+        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.035 },
+        { kind: 'tone', inst: 'square', oct: 1, pat: '0246024602460246', vol: 0.02, len: 0.5 },
+        {
+          kind: 'tone', inst: 'brass', vol: 0.085,
+          pat: ['4---3-2-1---2---', '4-------6-------', '5---4-3-2---3---', '7---------------', '4-5-6-7-8---7---', '6-------4-------', '5---6---7---6---', '7-------8-------'],
+        },
+        { kind: 'tone', inst: 'horn', oct: -1, vol: 0.05, pat: ['0---------------', '5---------------', '3---------------', '4---------------'] },
+      ],
+      drums: {
+        k: ['x.....x...x.....', 'x.....x...x..x.x'],
+        s: ['....x.......x...', '....x..x....x.xx'],
+        h: 'xxxxxxxxxxxxxxxx',
+        c: CRASH8,
+      },
+      dv: { h: 0.022, s: 0.2, k: 0.4 },
+    },
+    // The world stabilizes: warm, bright and triumphant.
+    dawn: {
+      bpm: 96, prog: 'C G Am F C G F C', key: 0, scale: SC.major,
+      parts: [
+        { kind: 'bass', inst: 'tri', pat: 'x...x...x...x.o.', vol: 0.28 },
+        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.05 },
+        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.03 },
+        { kind: 'tone', inst: 'harp', pat: '0.2.4.2.0.2.4.2.', vol: 0.04 },
+        {
+          kind: 'tone', inst: 'horn', vol: 0.09,
+          pat: ['4-------5---6---', '7-------4-------', '5---6---7---8---', '7---------------', '9-------8---7---', '8-------6-------', '7---6---5---4---', '4---------------'],
+        },
+        { kind: 'tone', inst: 'bell', oct: 1, vol: 0.03, pat: ['0---------------', '', '2---------------', '', '4---------------', '', '3---------------', '0---------------'] },
+      ],
+      drums: { k: 'x.......x.......', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', c: CRASH8 },
+      dv: { h: 0.018, s: 0.12 },
+    },
+    lament: {
+      bpm: 60, prog: 'Fm Db Bbm C', glitch: true, noMod: true,
+      parts: [
+        { kind: 'pad', inst: 'strings', pat: 'x---------------', vol: 0.05 },
+        { kind: 'pad', inst: 'choir', pat: 'x---------------', vol: 0.03 },
+        { kind: 'tone', inst: 'harp', pat: '0.2.4.2.0.2.4.2.', vol: 0.03 },
+        { kind: 'tone', inst: 'flute', oct: 1, vol: 0.06, pat: ['4-------3---2---', '1---------------', '2-------3-------', '2---------------'] },
+      ],
+    },
+    // Circus polka: oom-pah tuba bass, calliope organ lead, silly chromatic-ish runs.
+    battle_joker: {
+      bpm: 184, prog: 'C G C G F C G C',
+      parts: [
+        { kind: 'bass', inst: 'tri', pat: 'x...5...x...5...', vol: 0.34, len: 0.5 },
+        { kind: 'tone', inst: 'organ', pat: '..0...1...0...1.', vol: 0.05, len: 0.4 },
+        {
+          kind: 'tone', inst: 'organ', oct: 1, vol: 0.06, len: 0.6,
+          pat: ['4321234-4321234-', '5-4-3-2-1-------', '4321234-4321234-', '5-6-7-----------', '6543456-6543456-', '4-3-2-1-0-------', '4-4-5-5-6-6-7---', '7---0-----------'],
+        },
+        { kind: 'tone', inst: 'bell', oct: 1, vol: 0.03, pat: '0.......2.......' },
+      ],
+      drums: { k: 'x.......x.......', s: '....x.......x...', o: '..x...x...x...x.', c: CRASH8 },
+      dv: { s: 0.14, o: 0.045 },
+    },
+    // Forest jig in 6/8: bodhran drum, plucked lute, nimble Dorian flute like an outlaw's tune.
+    battle_archer: {
+      bpm: 204, steps: 12, prog: 'Dm C G Dm F C G A', key: 2, scale: SC.dorian,
+      parts: [
+        { kind: 'bass', inst: 'tri', pat: 'x..o..x..o..', vol: 0.32 },
+        { kind: 'tone', inst: 'pluck', pat: '0.1.2.0.1.2.', vol: 0.05 },
+        {
+          kind: 'tone', inst: 'flute', oct: 1, vol: 0.085,
+          pat: ['4.3.2.4.3.2.', '1.2.3.4-----', '4.3.2.4.5.6.', '7-----4-----', '6.5.4.6.5.4.', '3.4.5.6-----', '4.5.6.7.6.5.', '4-----------'],
+        },
+        { kind: 'tone', inst: 'harp', vol: 0.04, pat: ['0-----2-----', '1-----------', '3-----------', '0-----------', '2-----------', '1-----------', '3-----------', '4-----------'] },
+      ],
+      drums: { T: 'x.....x.....', t: '...x.x...x.x', h: 'x.x.x.x.x.x.', c: CRASH8 },
+      dv: { T: 0.36, t: 0.15, h: 0.022 },
+    },
+    // Divine judgement in 6/8: cathedral organ, choir, chiming bells, rolling timpani, harmonic minor.
+    battle_lightGods: {
+      bpm: 150, steps: 12, prog: 'Cm Ab Fm G Cm Ab Db G', key: 0, scale: SC.harmMin,
+      parts: [
+        { kind: 'bass', inst: 'bass', pat: 'x.....x.....', vol: 0.26 },
+        { kind: 'pad', inst: 'organ', pat: 'x-----------', vol: 0.06 },
+        { kind: 'pad', inst: 'choir', pat: 'x-----------', vol: 0.05 },
+        { kind: 'tone', inst: 'bell', oct: 1, pat: '0..1..2..1..', vol: 0.045 },
+        {
+          kind: 'tone', inst: 'brass', vol: 0.09,
+          pat: ['4-----3-2---', '2-----0-----', '4-----5-6---', '4-----------', '7-----6-5---', '6-----5-4---', '5-----3-2---', '1-----------'],
+        },
+      ],
+      drums: { T: 'x.....x.....', k: 'x.....x..x..', h: '..x..x..x..x', p: ['', '', '', 'x.x.x.xxxxxx'], c: CRASH8 },
+      dv: { T: 0.4, h: 0.022, k: 0.4 },
     },
     battle_lightGods2: {
       bpm: 100, prog: 'C#m D C#m D',
@@ -596,36 +886,152 @@
     return n;
   }
 
+  // Every track loops through main / variation / breakdown / peak sections so no area repeats one loop forever.
+  const FORM = ['A', 'B', 'C', 'P'];
+  const BRK_KICK = { 16: 'x.......x.......', 12: 'x.....x.....' };
+  const BRK_HAT = { 16: '..x...x...x...x.', 12: '..x..x..x..x' };
+  const BRK_BASS = { 16: 'x-------x-------', 12: 'x-----x-----' };
+  const hashA = (n) => {
+    const v = Math.sin(n * 91.345 + 47.853) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  const ARP_RHY = ['x.x.x.x.x.x.x.x.', 'x..x..x.x..x..x.', 'xx.x.xx.xx.x.xx.', 'x.xxx.x.x.xxx.x.', 'x...x.x.x...x.x.', 'x.x..x.xx.x..x.x', 'xxx.x.x.xxx.x.x.'];
+  function seedOf(name) {
+    let h = 7;
+    for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) % 100003;
+    return h;
+  }
+  function genArp(seed, k, steps = 16) {
+    const rhy = ARP_RHY[Math.floor(hashA(seed + k * 13.1) * ARP_RHY.length)];
+    let deg = Math.floor(hashA(seed * 1.7 + k) * 3), out = '';
+    for (let i = 0; i < steps; i++) {
+      if (rhy[i] !== 'x') {
+        out += '.';
+        continue;
+      }
+      out += deg;
+      deg = Math.max(0, Math.min(5, deg + [-2, -1, 1, 1, 2, -1, 3][Math.floor(hashA(seed + k * 7 + i * 3.3) * 7)]));
+    }
+    return out;
+  }
+  function varyLead(str, seed) {
+    let out = '';
+    for (let i = 0; i < str.length; i++) {
+      const c = str[i];
+      if (c >= '0' && c <= '9' && hashA(seed + i * 5.7) < 0.4) out += Math.max(0, Math.min(8, +c + (hashA(seed + i * 2.3) < 0.5 ? 1 : -1)));
+      else out += c;
+    }
+    return out;
+  }
+  function arrange(name, d) {
+    const seed = seedOf(name);
+    const arps = [0, 1, 2].map((k) => genArp(seed, k, d.steps || 16));
+    const leadVar = d.parts.map((p, pi) => (Array.isArray(p.pat) ? p.pat.map((s, i) => varyLead(s, seed + pi * 17 + i * 31)) : null));
+    return { seed, arps, leadVar };
+  }
+
   function playStep(c, step, t) {
-    const d = c.def, sd = c.sd, out = c.bus;
-    const bar = Math.floor(step / 16), s = step % 16;
-    const ch = d.chords[bar % d.chords.length];
-    const cb = 60 + ch.r - (ch.r > 7 ? 12 : 0);
+    const d = c.def, sd = c.sd, out = c.bus, ar = c.ar;
+    const S = d.steps || 16;
+    const bar = Math.floor(step / S), s = step % S;
+    if (d.swing && s % 2 === 1) t += d.swing * sd;
+    const nb = d.chords.length, lb = bar % nb;
+    const sec = (d.form || FORM)[Math.floor(bar / nb) % (d.form || FORM).length];
+    const lastBar = lb === nb - 1;
+    const tr = sec === 'P' && !d.noMod ? 2 : 0;
+    const ch = d.chords[lb];
+    const cb = 60 + ch.r - (ch.r > 7 ? 12 : 0) + tr;
+    const glitchy = !!d.glitch;
     if (d.drums) {
       for (const k in d.drums) {
-        const str = pick(d.drums[k], bar);
+        let str = pick(d.drums[k], bar);
+        if (sec === 'C') str = k === 'k' ? BRK_KICK[S] : k === 'h' ? BRK_HAT[S] : null;
         if (str && str[s] === 'x') DRUM[k](t, (d.dv && d.dv[k]) || DRUM_VOL[k], out);
       }
+      if (sec === 'C' && lastBar) {
+        if (s >= 4) snare(t, 0.04 + s * 0.012, out);
+        if (s === 0) noise(t, sd * S, 0.07, 'bandpass', 300, 6000, out, 2, sd * (S - 2));
+      } else if (lastBar && s >= S - 4 && sec !== 'C') {
+        snare(t, 0.12 + (s - S + 4) * 0.03, out);
+        if (s >= S - 2) tom(t, 0.2, out);
+      }
+      if (sec === 'P') {
+        if (s === 0 && lb % 2 === 0) crash(t, 0.11, out);
+        if (s % 2 === 1 && d.drums.h) hat(t, 0.025, out);
+        if (s === 0 && lb === 0) kick(t, 0.6, out);
+      }
     }
-    for (const p of d.parts) {
-      const str = pick(p.pat, bar);
-      if (!str) continue;
+    d.parts.forEach((p, pi) => {
+      const lead = p.kind === 'tone' && Array.isArray(p.pat);
+      const arp = p.kind === 'tone' && !lead;
+      let str = pick(p.pat, bar), inst = p.inst, vol = p.vol;
+      if (sec === 'B') {
+        if (lead) str = pick(ar.leadVar[pi], bar);
+        else if (arp) str = ar.arps[0];
+      } else if (sec === 'C') {
+        if (lead) {
+          str = ar.arps[1];
+          inst = glitchy ? 'tri' : 'harp';
+          vol *= 0.8;
+        } else if (arp) str = null;
+        else if (p.kind === 'bass') str = BRK_BASS[S];
+      } else if (sec === 'P' && arp) {
+        str = ar.arps[2];
+      }
+      if (!str) return;
       const sym = str[s];
       const oct = 12 * (p.oct || 0);
       let notes = null;
       if (p.kind === 'bass') {
         const off = { x: 0, o: 12, 5: 7, 3: ch.iv[1] }[sym];
-        if (off !== undefined) notes = [36 + ch.r - (ch.r > 6 ? 12 : 0) + oct + off];
+        if (off !== undefined) notes = [36 + ch.r - (ch.r > 6 ? 12 : 0) + oct + off + tr];
       } else if (p.kind === 'pad') {
         if (sym === 'x') notes = ch.iv.slice(0, 4).map((v) => cb + oct + v);
       } else if (sym >= '0' && sym <= '9') {
-        const i = +sym, n = ch.iv.length;
-        notes = [cb + oct + ch.iv[i % n] + 12 * Math.floor(i / n)];
+        const i = +sym;
+        if (lead && d.scale) {
+          const n = d.scale.length;
+          notes = [60 + d.key - (d.key > 7 ? 12 : 0) + tr + oct + d.scale[i % n] + 12 * Math.floor(i / n)];
+        } else {
+          const n = ch.iv.length;
+          notes = [cb + oct + ch.iv[i % n] + 12 * Math.floor(i / n)];
+        }
       }
-      if (!notes) continue;
+      if (!notes) return;
       const dur = holds(str, s) * sd * (p.len || 0.9);
-      for (const m of notes) voice(p.inst, m, t, dur, p.vol, out);
+      for (const m of notes) {
+        voice(inst, m, t, dur, vol, out);
+        if (lead && sec === 'P') voice(glitchy ? 'square' : 'brass', m + 12, t, dur, vol * 0.4, out);
+        if (lead && (sec === 'A' || sec === 'B') && hashA(ar.seed + step * 1.7) < 0.08) voice('bell', m + 12, t + sd * 0.5, sd * 0.5, vol * 0.35, out);
+        if (glitchy && hashA(ar.seed * 3 + step * 1.31 + pi) < (sec === 'P' ? 0.1 : 0.05)) {
+          for (let r = 1; r <= 3; r++) voice(inst, m + (r === 3 ? 12 : 0), t + (r * sd) / 4, sd / 5, vol * Math.pow(0.7, r), out);
+        }
+      }
+    });
+    if (glitchy) {
+      if (rnd() < (sec === 'P' ? 0.08 : 0.04)) sweep('square', 200 + rnd() * 2000, 100 + rnd() * 3000, t, sd * 0.6, 0.022, out);
+      if (s % 4 === 2 && hashA(ar.seed + step * 0.77) < 0.035) {
+        c.gate.gain.setValueAtTime(0.0001, t);
+        c.gate.gain.setValueAtTime(1, t + sd * 0.85);
+      }
+      if (s === 0 && lb === 0 && sec === 'P') noise(t, 0.25, 0.08, 'bandpass', 4000, 300, out, 3);
     }
+  }
+
+  function makeCrusher(levels, pre = 1.5) {
+    const input = ctx.createGain();
+    input.gain.value = pre;
+    const sh = ctx.createWaveShaper();
+    const n = 4096, curve = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      const x = (i / (n - 1)) * 2 - 1;
+      curve[i] = Math.round(x * levels) / levels;
+    }
+    sh.curve = curve;
+    const output = ctx.createGain();
+    output.gain.value = 1 / pre;
+    input.connect(sh).connect(output);
+    return { input, output };
   }
 
   function setMusic(name) {
@@ -645,11 +1051,20 @@
     if (!def) return;
     const start = ctx.currentTime + 0.35;
     const bus = ctx.createGain();
-    bus.connect(musicBus);
+    const gate = ctx.createGain();
+    bus.connect(gate);
+    if (def.glitch) {
+      const cr = makeCrusher(10);
+      gate.connect(cr.input);
+      cr.output.connect(musicBus);
+    } else {
+      gate.connect(musicBus);
+    }
     bus.gain.setValueAtTime(0.0001, ctx.currentTime);
     bus.gain.setValueAtTime(0.0001, start);
     bus.gain.linearRampToValueAtTime(1, start + 0.3);
-    cur = { name, def, bus, step: 0, next: start, sd: 60 / def.bpm / 4 };
+    if (!def.ar) def.ar = arrange(name, def);
+    cur = { name, def, bus, gate, ar: def.ar, step: 0, next: start, sd: 60 / def.bpm / 4 };
   }
 
   setInterval(() => {
@@ -702,8 +1117,11 @@
     blip(t, who) {
       const f = {
         MONKEY: 1000 + rnd() * 400, ANGEL: 1100, 'SKY BIRD': 1350 + rnd() * 250, 'LIGHT OF GODS': 200, KNIGHT: 330, ARCHER: 760, JOKER: 500 + rnd() * 700, KING: 200,
+        MECHANIC: 280 + rnd() * 60, ALIEN: 1200 + rnd() * 900, CAPTAIN: 170 + rnd() * 40,
+        'BROKEN MECH': rnd() < 0.2 ? 900 + rnd() * 900 : 110 + rnd() * 50,
+        '???': 70 + rnd() * 30, 'THOUSAND FORGER': rnd() < 0.15 ? 600 + rnd() * 600 : 80 + rnd() * 30,
       }[who] || 620;
-      const w = who === 'LIGHT OF GODS' || who === 'KING' ? 'sawtooth' : who === 'ANGEL' ? 'sine' : 'square';
+      const w = ['LIGHT OF GODS', 'KING', 'MECHANIC', 'CAPTAIN', 'BROKEN MECH', '???', 'THOUSAND FORGER'].includes(who) ? 'sawtooth' : who === 'ANGEL' ? 'sine' : 'square';
       sweep(w, f, f * 0.97, t, 0.04, 0.06, sfxBus);
     },
     text: (t) => sweep('square', 520, 500, t, 0.03, 0.045, sfxBus),
@@ -1120,6 +1538,487 @@
       chordV('choir', t + 0.2, [50, 57, 62, 66, 69, 74], 4, 0.05);
       bells(t + 0.6, [74, 78, 81, 86, 90, 93], 0.15, 0.05);
     },
+    mpunch(t) {
+      sweep('square', 300, 900, t, 0.12, 0.04, sfxBus);
+      noise(t + 0.15, 0.2, 0.15, 'bandpass', 600, 2400, sfxBus, 1);
+    },
+    imp_mpunch(t) {
+      kick(t, 0.7, sfxBus);
+      noise(t, 0.12, 0.3, 'bandpass', 3500, 1500, sfxBus, 3);
+      sweep('square', 1600, 1200, t, 0.08, 0.04, sfxBus);
+    },
+    ray: (t) => sweep('sine', 300, 2200, t, 0.5, 0.06, sfxBus),
+    rayFire(t) {
+      sweep('sawtooth', 1800, 120, t, 0.7, 0.07, sfxBus);
+      sweep('square', 900, 60, t, 0.7, 0.04, sfxBus);
+      noise(t, 0.8, 0.25, 'highpass', 2000, 6000, sfxBus, 1);
+    },
+    imp_ray(t) {
+      explode(t, 0.7);
+      sweep('sine', 1200, 200, t, 0.5, 0.06, sfxBus);
+    },
+    mash(t) {
+      sweep('sawtooth', 100, 500, t, 0.6, 0.05, sfxBus, 0.5);
+      noise(t, 0.6, 0.15, 'bandpass', 400, 1600, sfxBus, 2);
+    },
+    imp_mash(t) {
+      megaBoom(t);
+      noise(t, 0.4, 0.35, 'bandpass', 3000, 800, sfxBus, 2);
+    },
+    mech(t) {
+      sweep('sawtooth', 80, 300, t, 1.2, 0.05, sfxBus, 1);
+      chordV('brass', t + 0.2, [43, 50, 55], 1, 0.05);
+    },
+    imp_mech(t) {
+      kick(t, 0.5, sfxBus);
+      noise(t, 0.06, 0.25, 'highpass', 3000, 3000, sfxBus, 1);
+    },
+    gun(t) {
+      for (let i = 0; i < 3; i++) {
+        noise(t + i * 0.05, 0.04, 0.3, 'bandpass', 2500, 900, sfxBus, 2);
+        kick(t + i * 0.05, 0.25, sfxBus);
+      }
+    },
+    mechReady(t) {
+      chordV('brass', t, [43, 50, 55, 62], 0.9, 0.07);
+      timp(t, 0.8, sfxBus, 43);
+      crash(t, 0.12, sfxBus);
+      sweep('square', 400, 1600, t, 0.3, 0.04, sfxBus);
+    },
+    door(t) {
+      sweep('sawtooth', 120, 60, t, 0.7, 0.05, sfxBus);
+      noise(t, 0.8, 0.18, 'lowpass', 1200, 300, sfxBus);
+      kick(t + 0.7, 0.4, sfxBus);
+    },
+    alien: (t) => [0, 1, 2].forEach((i) => sweep('sine', 900 + rnd() * 900, 500 + rnd() * 1400, t + i * 0.07, 0.06, 0.05, sfxBus)),
+    weld: (t) => noise(t, 0.12, 0.12, 'highpass', 5000, 3000, sfxBus, 1),
+    mechIntro(t) {
+      megaBoom(t);
+      chordV('brass', t, [40, 47, 52, 59], 1.6, 0.07);
+      chordV('choir', t + 0.1, [52, 59, 64, 71], 2, 0.04);
+      crash(t, 0.25, sfxBus);
+    },
+    capIntro(t) {
+      megaBoom(t);
+      chordV('brass', t, [38, 45, 50, 57], 1.8, 0.07);
+      chordV('choir', t + 0.1, [50, 57, 62, 69], 2.2, 0.045);
+      sweep('sawtooth', 60, 900, t, 1.2, 0.04, sfxBus, 0.8);
+      crash(t, 0.25, sfxBus);
+    },
+    cpunch(t) {
+      sweep('sine', 300, 1400, t, 0.18, 0.05, sfxBus);
+      noise(t + 0.17, 0.14, 0.22, 'bandpass', 900, 2800, sfxBus, 1);
+    },
+    imp_cpunch(t) {
+      kick(t, 0.85, sfxBus);
+      noise(t, 0.14, 0.32, 'bandpass', 2200, 1100, sfxBus, 2);
+      sweep('square', 1000, 260, t, 0.14, 0.05, sfxBus);
+    },
+    cray(t) {
+      sweep('sine', 120, 900, t, 0.25, 0.05, sfxBus);
+      [0, 1, 2].forEach((i) => sweep('square', 600 + i * 300, 650 + i * 300, t + 0.25 + i * 0.06, 0.05, 0.03, sfxBus));
+    },
+    imp_cray(t) {
+      explode(t, 0.8);
+      sweep('sawtooth', 1500, 180, t, 0.5, 0.05, sfxBus);
+      sweep('sine', 2000, 300, t + 0.03, 0.5, 0.05, sfxBus);
+    },
+    katana: (t) => chordV('choir', t, [62, 69, 74], 0.8, 0.03),
+    unsheathe(t) {
+      noise(t, 0.45, 0.2, 'bandpass', 4500, 7500, sfxBus, 4, 0.3);
+      voice('bell', 98, t + 0.42, 0.6, 0.06, sfxBus);
+      voice('bell', 105, t + 0.46, 0.5, 0.03, sfxBus);
+    },
+    sheathe(t) {
+      noise(t, 0.25, 0.15, 'bandpass', 5000, 3000, sfxBus, 3);
+      sweep('square', 2200, 2200, t + 0.24, 0.03, 0.06, sfxBus);
+    },
+    imp_katana(t) {
+      noise(t, 0.3, 0.45, 'highpass', 5000, 1200, sfxBus, 1);
+      kick(t, 0.8, sfxBus);
+      sweep('sawtooth', 2600, 90, t, 0.55, 0.06, sfxBus);
+      crash(t, 0.12, sfxBus);
+    },
+    teleport(t) {
+      sweep('sine', 2200, 260, t, 0.22, 0.06, sfxBus);
+      sweep('square', 260, 2200, t + 0.08, 0.18, 0.025, sfxBus);
+    },
+    kontrol(t) {
+      sweep('sine', 300, 2400, t, 0.4, 0.05, sfxBus);
+      chordV('brass', t + 0.3, [38, 45, 50], 0.9, 0.06);
+      timp(t + 0.3, 0.7, sfxBus, 45);
+    },
+    lurch(t) {
+      sweep('sawtooth', 70, 40, t, 1.4, 0.12, sfxBus);
+      noise(t, 1.4, 0.3, 'lowpass', 500, 120, sfxBus, 1, 0.2);
+      for (let i = 0; i < 5; i++) noise(t + 0.2 + i * 0.18, 0.08, 0.15, 'bandpass', 1800 + rnd() * 1500, 1200, sfxBus, 3);
+    },
+    crate(t) {
+      kick(t, 0.7, sfxBus);
+      noise(t, 0.22, 0.3, 'lowpass', 1000, 220, sfxBus);
+      noise(t, 0.05, 0.15, 'bandpass', 3000, 2000, sfxBus, 2);
+    },
+    imp_kontrol(t) {
+      kick(t, 0.9, sfxBus);
+      noise(t, 0.45, 0.4, 'lowpass', 2400, 200, sfxBus);
+      for (let i = 0; i < 6; i++) noise(t + 0.05 + i * 0.04, 0.05, 0.18, 'bandpass', 1500 + rnd() * 2500, 1500, sfxBus, 3);
+    },
+    spark(t) {
+      noise(t, 0.06, 0.18, 'highpass', 6000, 4000, sfxBus, 1);
+      sweep('square', 2400 + rnd() * 1200, 1800, t, 0.03, 0.025, sfxBus);
+      noise(t + 0.07, 0.04, 0.1, 'highpass', 5000, 5000, sfxBus, 1);
+    },
+    bpunch(t) {
+      sweep('sawtooth', 90, 260, t, 0.25, 0.05, sfxBus);
+      noise(t + 0.2, 0.12, 0.2, 'bandpass', 800, 2400, sfxBus, 1);
+    },
+    imp_bpunch(t) {
+      kick(t, 0.8, sfxBus);
+      noise(t, 0.14, 0.3, 'bandpass', 1800, 900, sfxBus, 2);
+      sweep('square', 700, 140, t, 0.16, 0.05, sfxBus);
+    },
+    smash(t) {
+      sweep('sawtooth', 60, 420, t, 0.7, 0.05, sfxBus, 0.5);
+      sweep('sine', 1400, 200, t + 0.75, 0.25, 0.06, sfxBus);
+    },
+    imp_smash(t) {
+      megaBoom(t);
+      noise(t, 0.6, 0.35, 'lowpass', 900, 80, sfxBus);
+      for (let i = 0; i < 5; i++) noise(t + 0.1 + i * 0.07, 0.06, 0.14, 'bandpass', 1200 + rnd() * 2000, 1200, sfxBus, 3);
+    },
+    inferno(t) {
+      sweep('sawtooth', 100, 1400, t, 0.9, 0.05, sfxBus, 0.7);
+      chordV('choir', t + 0.2, [45, 52, 57], 1.2, 0.035);
+    },
+    imp_inferno(t) {
+      explode(t, 0.9);
+      sweep('sawtooth', 2200, 90, t, 0.8, 0.07, sfxBus);
+      noise(t, 0.9, 0.3, 'bandpass', 1500, 400, sfxBus, 1);
+    },
+    warnSign(t) {
+      sweep('square', 1320, 1320, t, 0.08, 0.05, sfxBus);
+      sweep('square', 990, 990, t + 0.1, 0.08, 0.05, sfxBus);
+      noise(t, 0.05, 0.12, 'highpass', 4000, 4000, sfxBus, 1);
+    },
+    overactive(t) {
+      megaBoom(t);
+      chordV('supersaw', t, [40, 46, 52, 58], 1.4, 0.05);
+      sweep('sawtooth', 80, 2400, t, 1.1, 0.05, sfxBus, 0.8);
+      for (let i = 0; i < 8; i++) sweep('square', 1500, 1500, t + i * 0.09, 0.04, 0.03, sfxBus);
+    },
+    rocketFist(t) {
+      sweep('sawtooth', 200, 900, t, 0.4, 0.05, sfxBus);
+      noise(t, 0.6, 0.3, 'bandpass', 900, 3000, sfxBus, 1, 0.1);
+    },
+    imp_overactive(t) {
+      kick(t, 0.8, sfxBus);
+      noise(t, 0.18, 0.3, 'bandpass', 2600, 900, sfxBus, 2);
+      sweep('sawtooth', 1600, 200, t, 0.2, 0.04, sfxBus);
+    },
+    shipFail(t) {
+      sweep('sawtooth', 600, 40, t, 2.2, 0.08, sfxBus, 0.1);
+      sweep('square', 300, 30, t + 0.1, 2.2, 0.04, sfxBus);
+      noise(t, 1.6, 0.2, 'lowpass', 1200, 100, sfxBus, 1);
+      [0, 1, 2].forEach((i) => sweep('square', 880, 880, t + 0.3 + i * 0.3, 0.12, 0.04, sfxBus));
+    },
+    fallRoar(t) {
+      noise(t, 4, 0.35, 'lowpass', 300, 1800, sfxBus, 1, 1.5);
+      noise(t + 1, 3.5, 0.25, 'bandpass', 600, 2600, sfxBus, 0.7, 1);
+      sweep('sawtooth', 50, 90, t, 4, 0.05, sfxBus, 1.5);
+    },
+    coreRise(t) {
+      sweep('sine', 120, 2400, t, 1.6, 0.07, sfxBus, 0.2);
+      sweep('square', 240, 3200, t + 0.1, 1.5, 0.025, sfxBus, 0.2);
+      for (let i = 0; i < 6; i++) sweep('square', 400 + rnd() * 2000, 200 + rnd() * 3000, t + 0.2 + i * 0.15, 0.06, 0.03, sfxBus);
+    },
+    hack(t) {
+      megaBoom(t);
+      chordV('supersaw', t, [37, 43, 49, 55], 2.4, 0.05);
+      for (let i = 0; i < 16; i++) sweep('square', 200 + rnd() * 3000, 200 + rnd() * 3000, t + i * 0.06, 0.05, 0.035, sfxBus);
+      noise(t, 1.5, 0.2, 'bandpass', 3000, 300, sfxBus, 2);
+    },
+    mechBoot(t) {
+      sweep('sawtooth', 40, 320, t, 1.6, 0.06, sfxBus, 0.8);
+      for (let i = 0; i < 6; i++) noise(t + 0.3 + i * 0.22, 0.05, 0.15, 'highpass', 5000, 4000, sfxBus, 1);
+      [0, 1, 2].forEach((i) => sweep('square', 500 + i * 250, 500 + i * 250, t + 1.2 + i * 0.12, 0.08, 0.04, sfxBus));
+    },
+    wreckIntro(t) {
+      megaBoom(t);
+      chordV('brass', t, [37, 44, 49, 56], 1.8, 0.07);
+      chordV('supersaw', t + 0.1, [49, 55, 61], 2, 0.035);
+      for (let i = 0; i < 10; i++) sweep('square', 300 + rnd() * 2500, 200 + rnd() * 2500, t + 0.4 + i * 0.05, 0.04, 0.03, sfxBus);
+      crash(t, 0.25, sfxBus);
+    },
+    ghostWail(t) {
+      sweep('sine', 300, 900, t, 0.6, 0.05, sfxBus, 0.2);
+      sweep('sine', 900, 250, t + 0.6, 1.2, 0.05, sfxBus);
+      sweep('triangle', 310, 880, t, 0.6, 0.03, sfxBus, 0.2);
+      noise(t, 1.6, 0.08, 'bandpass', 800, 2400, sfxBus, 6, 0.4);
+    },
+    ghostAppear(t) {
+      megaBoom(t);
+      chordV('choir', t, [41, 42, 48, 53, 54], 2.2, 0.06);
+      sweep('sawtooth', 1800, 90, t, 0.9, 0.08, sfxBus);
+      for (let i = 0; i < 12; i++) sweep('square', 200 + rnd() * 3000, 100 + rnd() * 3000, t + i * 0.04, 0.04, 0.04, sfxBus);
+      crash(t, 0.3, sfxBus);
+    },
+    castleBoom(t) {
+      megaBoom(t);
+      megaBoom(t + 0.25);
+      for (let i = 0; i < 10; i++) noise(t + 0.2 + i * 0.09, 0.15, 0.2, 'lowpass', 1600, 200, sfxBus);
+    },
+    forgerIntro(t) {
+      megaBoom(t);
+      chordV('organ', t, [29, 36, 41, 44], 2.2, 0.08);
+      chordV('choir', t + 0.1, [53, 56, 60, 65], 2.4, 0.05);
+      sweep('sawtooth', 50, 1200, t, 1.2, 0.05, sfxBus, 0.9);
+      crash(t, 0.3, sfxBus);
+    },
+    fpunch(t) {
+      sweep('sawtooth', 70, 220, t, 0.5, 0.06, sfxBus, 0.3);
+      noise(t, 0.6, 0.15, 'lowpass', 400, 1600, sfxBus, 1, 0.3);
+    },
+    imp_fpunch(t) {
+      megaBoom(t);
+      for (let i = 0; i < 8; i++) noise(t + 0.05 + i * 0.05, 0.08, 0.18, 'bandpass', 900 + rnd() * 2400, 900, sfxBus, 2);
+    },
+    brick(t) {
+      sweep('sawtooth', 60, 180, t, 0.6, 0.05, sfxBus, 0.4);
+      chordV('organ', t, [29, 36], 0.8, 0.05);
+    },
+    imp_brick(t) {
+      kick(t, 1, sfxBus);
+      noise(t, 0.5, 0.4, 'lowpass', 1800, 150, sfxBus);
+      for (let i = 0; i < 6; i++) noise(t + 0.04 + i * 0.05, 0.06, 0.16, 'bandpass', 1500 + rnd() * 2000, 1200, sfxBus, 3);
+    },
+    gbeam(t) {
+      chordV('choir', t, [41, 47, 52], 2, 0.05);
+      sweep('sine', 120, 60, t, 2, 0.06, sfxBus);
+    },
+    ghostScream(t) {
+      sweep('sawtooth', 400, 1400, t, 0.4, 0.07, sfxBus);
+      sweep('sawtooth', 1400, 300, t + 0.4, 0.9, 0.06, sfxBus);
+      sweep('square', 413, 1390, t, 0.4, 0.03, sfxBus);
+      noise(t, 1.3, 0.25, 'bandpass', 1200, 3500, sfxBus, 2, 0.1);
+      chordV('choir', t, [53, 54, 60], 1.6, 0.06);
+    },
+    gcharge(t) {
+      sweep('sine', 100, 1800, t, 1.1, 0.06, sfxBus, 0.8);
+      noise(t, 1.1, 0.15, 'bandpass', 300, 4000, sfxBus, 4, 0.9);
+    },
+    ghostBeam(t) {
+      sweep('sawtooth', 900, 120, t, 1.4, 0.08, sfxBus);
+      sweep('sine', 1300, 200, t, 1.4, 0.06, sfxBus);
+      noise(t, 1.4, 0.3, 'bandpass', 2000, 500, sfxBus, 1);
+      chordV('choir', t, [48, 54, 60, 66], 1.4, 0.05);
+    },
+    imp_gbeam(t) {
+      megaBoom(t);
+      sweep('sawtooth', 2400, 80, t, 0.9, 0.07, sfxBus);
+    },
+    cdef(t) {
+      chordV('brass', t, [41, 48, 53], 1.4, 0.06);
+      timp(t, 0.8, sfxBus, 41);
+    },
+    shieldUp(t) {
+      kick(t, 0.9, sfxBus);
+      noise(t, 0.3, 0.3, 'lowpass', 2000, 300, sfxBus);
+      voice('bell', 77, t + 0.1, 0.8, 0.07, sfxBus);
+      voice('bell', 84, t + 0.18, 0.8, 0.05, sfxBus);
+      sweep('sine', 200, 1600, t, 0.6, 0.04, sfxBus);
+    },
+    shockwave(t) {
+      sweep('sine', 160, 40, t, 0.9, 0.12, sfxBus);
+      noise(t, 0.9, 0.35, 'lowpass', 3000, 100, sfxBus);
+    },
+    imp_cdef(t) {
+      kick(t, 1, sfxBus);
+      noise(t, 0.4, 0.3, 'bandpass', 900, 300, sfxBus, 1);
+    },
+    shieldBlock(t) {
+      voice('bell', 72, t, 0.5, 0.09, sfxBus);
+      voice('bell', 79, t, 0.5, 0.06, sfxBus);
+      noise(t, 0.12, 0.3, 'bandpass', 3000, 2000, sfxBus, 2);
+      kick(t, 0.5, sfxBus);
+    },
+    shieldBreak(t) {
+      noise(t, 0.6, 0.35, 'highpass', 3000, 6000, sfxBus, 1);
+      for (let i = 0; i < 6; i++) voice('bell', 84 + Math.floor(rnd() * 12), t + i * 0.05, 0.3, 0.04, sfxBus);
+    },
+    crumble(t) {
+      for (let i = 0; i < 14; i++) noise(t + i * 0.12, 0.2, 0.2, 'lowpass', 1200 + rnd() * 800, 150, sfxBus);
+      sweep('sawtooth', 200, 40, t, 1.8, 0.05, sfxBus);
+    },
+    ghostDeath(t) {
+      megaBoom(t);
+      chordV('choir', t, [41, 48, 53, 56, 60, 65], 4, 0.06);
+      bells(t + 0.3, [77, 80, 84, 89, 92, 96], 0.14, 0.05);
+      sweep('sine', 1600, 60, t, 2.5, 0.06, sfxBus);
+    },
+    gpunch(t) {
+      sweep('square', 1200, 200, t, 0.15, 0.04, sfxBus);
+    },
+    gshift(t) {
+      sweep('sawtooth', 300, 1400, t, 0.18, 0.05, sfxBus);
+      for (let i = 0; i < 4; i++) sweep('square', 400 + rnd() * 2000, 400 + rnd() * 2000, t + 0.05 + i * 0.04, 0.03, 0.03, sfxBus);
+    },
+    gbullet(t) {
+      sweep('sawtooth', 900, 60, t, 0.5, 0.08, sfxBus);
+      sweep('square', 1800, 120, t, 0.4, 0.03, sfxBus);
+      noise(t, 0.4, 0.25, 'bandpass', 2000, 300, sfxBus, 2);
+    },
+    imp_gpunch(t) {
+      kick(t, 0.9, sfxBus);
+      for (let i = 0; i < 6; i++) sweep('square', 200 + rnd() * 2400, 100 + rnd() * 1200, t + i * 0.03, 0.04, 0.035, sfxBus);
+    },
+    afterimg(t) {
+      for (let i = 0; i < 3; i++) {
+        sweep('square', 300 + i * 200, 1200 + i * 300, t + i * 0.1, 0.12, 0.04, sfxBus);
+        voice('bell', 64 + i * 5, t + i * 0.1, 0.4, 0.04, sfxBus);
+      }
+    },
+    gdash(t) {
+      sweep('sawtooth', 200, 1600, t, 0.15, 0.05, sfxBus);
+      noise(t, 0.18, 0.2, 'highpass', 3000, 5000, sfxBus, 1);
+    },
+    imp_afterimg(t) {
+      kick(t, 0.8, sfxBus);
+      noise(t, 0.2, 0.3, 'bandpass', 1800, 600, sfxBus, 2);
+    },
+    ginferno(t) {
+      chordV('choir', t, [40, 47, 52, 59], 2.6, 0.05);
+      chordV('supersaw', t + 0.2, [52, 55, 59], 2, 0.03);
+      sweep('sine', 1400, 90, t, 2.2, 0.05, sfxBus);
+      for (let i = 0; i < 8; i++) sweep('square', 300 + rnd() * 2500, 200 + rnd() * 2500, t + i * 0.08, 0.04, 0.03, sfxBus);
+    },
+    glightAppear(t) {
+      voice('bell', 84, t, 0.8, 0.06, sfxBus);
+      voice('bell', 91, t + 0.06, 0.8, 0.04, sfxBus);
+      sweep('square', 600, 2400, t, 0.2, 0.025, sfxBus);
+    },
+    gblueBeam(t) {
+      sweep('sawtooth', 1400, 200, t, 0.8, 0.07, sfxBus);
+      sweep('sine', 2000, 300, t, 0.8, 0.05, sfxBus);
+      noise(t, 0.8, 0.28, 'bandpass', 2500, 600, sfxBus, 1);
+    },
+    imp_ginferno(t) {
+      megaBoom(t);
+      sweep('sawtooth', 2200, 100, t, 0.7, 0.06, sfxBus);
+    },
+    gdomain(t) {
+      chordV('supersaw', t, [40, 46, 52], 1.2, 0.04);
+      sweep('sawtooth', 100, 900, t, 0.6, 0.05, sfxBus, 0.3);
+    },
+    domainUp(t) {
+      sweep('sine', 200, 1600, t, 0.5, 0.06, sfxBus);
+      bells(t + 0.1, [76, 83, 88, 95], 0.06, 0.04);
+      noise(t, 0.5, 0.15, 'highpass', 2000, 6000, sfxBus, 1);
+    },
+    gslash(t) {
+      noise(t, 0.12, 0.35, 'highpass', 4000, 6000, sfxBus, 1);
+      sweep('sawtooth', 3000, 400, t, 0.12, 0.05, sfxBus);
+    },
+    imp_gdomain(t) {
+      kick(t, 0.6, sfxBus);
+      noise(t, 0.14, 0.25, 'bandpass', 3200, 1200, sfxBus, 2);
+    },
+    glitchShatter(t) {
+      for (let i = 0; i < 18; i++) sweep('square', 200 + rnd() * 3000, 100 + rnd() * 3000, t + i * 0.07, 0.05, 0.035, sfxBus);
+      sweep('sawtooth', 1200, 40, t, 2.4, 0.05, sfxBus);
+      chordV('choir', t + 0.4, [40, 46, 52], 2, 0.04);
+    },
+    kidBeam(t) {
+      sweep('sawtooth', 1600, 200, t, 0.6, 0.08, sfxBus);
+      sweep('square', 1640, 220, t, 0.6, 0.03, sfxBus);
+      noise(t, 0.6, 0.3, 'bandpass', 2400, 500, sfxBus, 1);
+    },
+    glitchIntro(t) {
+      megaBoom(t);
+      chordV('supersaw', t, [40, 47, 52, 55], 2.2, 0.06);
+      chordV('brass', t + 0.1, [28, 35, 40], 2, 0.06);
+      for (let i = 0; i < 14; i++) sweep('square', 200 + rnd() * 3000, 100 + rnd() * 3000, t + 0.3 + i * 0.05, 0.04, 0.035, sfxBus);
+      crash(t, 0.3, sfxBus);
+    },
+    dfist(t) {
+      for (let i = 0; i < 10; i++) sweep('square', 300 + i * 160, 600 + i * 200, t + i * 0.03, 0.05, 0.03, sfxBus);
+    },
+    dfistForm(t) {
+      sweep('sawtooth', 80, 400, t, 0.6, 0.05, sfxBus);
+      for (let i = 0; i < 8; i++) voice('bell', 60 + i * 3, t + i * 0.05, 0.2, 0.025, sfxBus);
+    },
+    imp_dfist(t) {
+      megaBoom(t);
+      for (let i = 0; i < 6; i++) sweep('square', 2000 - i * 250, 100, t + i * 0.02, 0.08, 0.035, sfxBus);
+    },
+    pbarrage(t) {
+      sweep('sine', 200, 1200, t, 0.4, 0.05, sfxBus);
+      sweep('square', 1200, 200, t + 0.2, 0.4, 0.025, sfxBus);
+    },
+    pzap(t) {
+      sweep('sawtooth', 2400, 300, t, 0.12, 0.05, sfxBus);
+      sweep('sine', 300, 1800, t + 0.04, 0.1, 0.04, sfxBus);
+    },
+    imp_pbarrage(t) {
+      kick(t, 0.5, sfxBus);
+      noise(t, 0.1, 0.22, 'bandpass', 3000, 1500, sfxBus, 2);
+    },
+    gland(t) {
+      chordV('choir', t, [36, 43, 48], 1.6, 0.04);
+      sweep('sawtooth', 60, 30, t, 1.5, 0.07, sfxBus);
+    },
+    quake(t) {
+      noise(t, 1.4, 0.35, 'lowpass', 200, 60, sfxBus);
+      sweep('sine', 50, 30, t, 1.4, 0.12, sfxBus);
+    },
+    stoneRise(t) {
+      noise(t, 0.35, 0.4, 'lowpass', 900, 200, sfxBus, 1);
+      kick(t, 0.8, sfxBus);
+      sweep('square', 200, 900, t, 0.2, 0.03, sfxBus);
+    },
+    imp_gland(t) {
+      megaBoom(t);
+      megaBoom(t + 0.12);
+      for (let i = 0; i < 10; i++) sweep('square', 200 + rnd() * 3000, 100 + rnd() * 1000, t + i * 0.04, 0.05, 0.035, sfxBus);
+    },
+    destab(t) {
+      for (let i = 0; i < 12; i++) sweep('square', 200 + rnd() * 3000, 100 + rnd() * 3000, t + i * 0.06, 0.05, 0.035, sfxBus);
+      sweep('sawtooth', 600, 60, t, 1.2, 0.05, sfxBus);
+    },
+    codeRush(t) {
+      noise(t, 1.6, 0.25, 'highpass', 2000, 6000, sfxBus, 1);
+      for (let i = 0; i < 16; i++) voice('bell', 72 + ((i * 5) % 24), t + i * 0.08, 0.15, 0.02, sfxBus);
+    },
+    coreBeam(t) {
+      sweep('sawtooth', 2000, 60, t, 1.4, 0.09, sfxBus);
+      sweep('square', 1980, 70, t, 1.4, 0.04, sfxBus);
+      noise(t, 1.4, 0.4, 'bandpass', 1800, 300, sfxBus, 1);
+    },
+    imp_destab(t) {
+      megaBoom(t);
+      crash(t, 0.4, sfxBus);
+    },
+    coreHum(t) {
+      sweep('sine', 40, 80, t, 2, 0.12, sfxBus);
+      chordV('choir', t + 0.3, [36, 43, 46], 2, 0.04);
+    },
+    coreIntro(t) {
+      megaBoom(t);
+      chordV('supersaw', t, [36, 43, 48, 51], 2.4, 0.06);
+      chordV('brass', t + 0.1, [24, 31, 36], 2.2, 0.06);
+      chordV('choir', t + 0.2, [48, 55, 60, 63], 2.4, 0.04);
+      for (let i = 0; i < 16; i++) sweep('square', 200 + rnd() * 3000, 100 + rnd() * 3000, t + 0.3 + i * 0.05, 0.04, 0.035, sfxBus);
+      crash(t, 0.35, sfxBus);
+    },
+    coreAlarm(t) {
+      for (let i = 0; i < 6; i++) sweep('square', 880, 660, t + i * 0.3, 0.25, 0.04, sfxBus);
+      sweep('sawtooth', 100, 1400, t, 2.2, 0.04, sfxBus);
+    },
+    stabilize(t) {
+      chordV('choir', t, [48, 52, 55, 60, 64, 67], 4, 0.06);
+      chordV('strings', t + 0.2, [36, 43, 48, 52], 4, 0.05);
+      bells(t + 0.4, [72, 76, 79, 84, 88, 91, 96], 0.12, 0.05);
+      sweep('sine', 200, 1600, t, 2.5, 0.05, sfxBus);
+    },
   };
 
   const lastPlay = {};
@@ -1139,15 +2038,30 @@
       setTimeout(() => old.disconnect(), 3000);
     }
     const g = ctx.createGain();
-    g.connect(sfxRoot);
+    if (glitchOn && !sfxCrush) {
+      sfxCrush = makeCrusher(12);
+      sfxCrush.output.connect(sfxRoot);
+    }
+    g.connect(glitchOn ? sfxCrush.input : sfxRoot);
     lastPlay[name] = { t: now, g };
     sfxBus = g;
     try {
       fn(now + 0.01, arg);
+      if (glitchOn && !NO_STUTTER.has(name) && rnd() < 0.3) {
+        const g2 = ctx.createGain();
+        g2.gain.value = 0.3;
+        g2.connect(sfxCrush.input);
+        sfxBus = g2;
+        fn(now + 0.07 + rnd() * 0.05, arg);
+        sweep('square', 300 + rnd() * 2500, 150 + rnd() * 2500, now + 0.02, 0.06, 0.08, g2);
+        setTimeout(() => g2.disconnect(), 4000);
+      }
     } finally {
       sfxBus = sfxRoot;
     }
   }
+  let glitchOn = false, sfxCrush = null;
+  const NO_STUTTER = new Set(['step', 'land', 'text', 'cursor', 'blip', 'jump', 'warn', 'beep', 'spark', 'confirm', 'back', 'open', 'close']);
 
   function toggleMute() {
     muted = !muted;
@@ -1166,5 +2080,5 @@
     return recDest.stream;
   }
 
-  window.Sound = { play, music: setMusic, toggleMute, isMuted: () => muted, stream };
+  window.Sound = { play, music: setMusic, toggleMute, isMuted: () => muted, stream, glitch: (on) => { glitchOn = !!on; } };
 })();
