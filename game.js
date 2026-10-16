@@ -31,7 +31,7 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const exportState = { on: false, encoder: null, chunks: [], n: 0, step: 0, finishing: false, saved: false, error: false };
   const net = {
-    peer: null, ready: false, anon: false, role: null, conn: null, partner: '', partnerEq: null, partnerGear: false,
+    peer: null, ready: false, anon: false, id: '', role: null, conn: null, partner: '', partnerEq: null, partnerGear: false, partnerScuba: false,
     pending: null, invite: null, gIn: {}, gDash: false, heroEq: null, heroName: '', lastRx: 0, fx: [],
     gSel: 0, gSent: false, ended: false, endT: 0, lost: false, lostT: 0, inviteRects: null,
   };
@@ -1748,7 +1748,8 @@
     const climbOk = game.mode === 'climb' && (climb.state === 'walk' || climb.state === 'ready');
     const townOk = game.mode === 'town8' && ['free', 'lead', 'airport'].includes(ch8.state);
     const seaOk = game.mode === 'sea8' && SEA_FREE.includes(sea8.state);
-    if (net.role === 'guest') return false;
+    // Red Kid (online guest) can open the bag in the ocean / town to swap gems.
+    if (net.role === 'guest') return (seaOk || townOk || inv.open) && !dialog.active && fade.dir === 0 && game.mode !== 'battle';
     return (game.mode === 'world' || castleOk || mazeOk || kingOk || shipOk || mechOk || bridgeOk || wreckOk || ruinsOk || groadOk || climbOk || townOk || seaOk) && !dialog.active && fade.dir === 0;
   }
 
@@ -1761,7 +1762,7 @@
   function invHitTest(x, y) {
     const p = { x, y };
     if (inRect(p, INV_CLOSE)) return 'close';
-    if (inRect(p, EQUIP_BTN) && isGem(inventory[inv.sel])) return 'equip';
+    if (inRect(p, EQUIP_BTN) && isGem(inventory[inv.sel]) && !(net.role === 'guest' && inventory[inv.sel] && ITEMS[inventory[inv.sel]].noKid)) return 'equip';
     for (let i = 0; i < invSlots(); i++) {
       if (inRect(p, invSlotRect(i))) return i;
     }
@@ -1775,6 +1776,26 @@
       sfx('close');
     } else if (hit === 'equip') {
       const id = inventory[inv.sel];
+      if (net.role === 'guest') {
+        if (game.mode === 'battle') {
+          toast.text = "CAN'T SWAP GEMS IN BATTLE!";
+          toast.t = 120;
+          sfx('back');
+          return;
+        }
+        if (id && ITEMS[id] && ITEMS[id].noKid) {
+          toast.text = "RED KID CAN'T USE THAT GEM!";
+          toast.t = 140;
+          sfx('back');
+          return;
+        }
+        inv.equipped = inv.equipped === id ? null : id;
+        sfx('equip');
+        netSend({ t: 'eq', eq: inv.equipped });
+        toast.text = inv.equipped ? `EQUIPPED ${ITEMS[inv.equipped].name}!` : 'UNEQUIPPED!';
+        toast.t = 90;
+        return;
+      }
       inv.equipped = inv.equipped === id ? null : id;
       sfx('equip');
       if (inv.equipped === 'forgerCrystal') {
@@ -5709,7 +5730,8 @@
       drawText(inventory.some(Boolean) ? 'SELECT AN ITEM' : 'YOUR BAG IS EMPTY', P.x + 18, P.y + 150, 8, '#8a7550', 'left', null);
     }
 
-    drawButton(EQUIP_BTN, sel && inv.equipped === sel ? 'UNEQUIP' : 'EQUIP', isGem(sel));
+    const canEq = isGem(sel) && !(net.role === 'guest' && sel && ITEMS[sel].noKid);
+    drawButton(EQUIP_BTN, sel && inv.equipped === sel ? 'UNEQUIP' : 'EQUIP', canEq);
   }
 
   // ---------- World render ----------
@@ -11271,9 +11293,10 @@
     const guest = net.role === 'guest';
     const guestEq = inv.equipped, guestName = playerName;
     if (guest) {
-      inv.equipped = net.heroEq;
-      playerName = net.heroName || net.partner;
-      syncPlayerLook();
+      // While the bag is open, keep Red Kid's own gem selected so EQUIP shows correctly.
+      inv.equipped = inv.open ? guestEq : net.heroEq;
+      playerName = inv.open ? guestName : (net.heroName || net.partner);
+      if (!inv.open) syncPlayerLook();
     }
     if (game.mode === 'battle' && battle) {
       renderBattleView();
@@ -33262,7 +33285,9 @@
           });
           const help = ['NPC: THE GAME PLAYS RED KID', 'PLAYER: AN ONLINE FRIEND JOINS YOU'];
           const hs = Math.min(...help.map((l) => fitSize(l, 244)));
-          help.forEach((l, i) => drawText(l, W / 2, 138 + i * (hs + 3), hs, '#6a5030', 'center', null));
+          help.forEach((l, i) => drawText(l, W / 2, 134 + i * (hs + 3), hs, '#6a5030', 'center', null));
+          const online = canPickOnline() ? `FRIENDS INVITE YOU AS: ${playerName}` : 'ONLINE: CONNECTING...';
+          drawText(online, W / 2, 158, fitSize(online, 244), canPickOnline() ? '#2a6a3a' : '#8a7550', 'center', null);
         } else if (p.state === 'name') {
           drawText("TYPE YOUR FRIEND'S EXACT NAME:", W / 2, 98, fitSize("TYPE YOUR FRIEND'S EXACT NAME:", 244), '#3b2a1a', 'center', null);
           cRect(102, 112, 180, 18, '#1c140c');
@@ -34595,7 +34620,10 @@
   // ---------- Chapter 8: Online co-op (PeerJS) ----------
   // Host runs the whole game and streams snapshots; the guest only renders them and sends inputs back.
   const NET_PREFIX = 'powerland-v8-';
-  const netIdFor = (name) => NET_PREFIX + name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  const netIdFor = (name) => {
+    const slug = String(name || 'hero').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'hero';
+    return NET_PREFIX + slug;
+  };
   const netAvailable = () => typeof Peer !== 'undefined' && net.ready && !replay.on;
   const NET_FAIL_MSG = {
     OFFLINE: "COULDN'T FIND THAT PLAYER. ARE THEY ONLINE?",
@@ -34605,12 +34633,29 @@
     CANCEL: 'REQUEST CANCELLED.',
   };
 
-  function netStart() {
-    if (typeof Peer === 'undefined' || replay.on || net.peer) return;
-    netOpenPeer(netIdFor(playerName));
+  function netDestroyPeer() {
+    const old = net.peer;
+    net.peer = null;
+    net.ready = false;
+    net.id = '';
+    if (!old) return;
+    try {
+      old.destroy();
+    } catch (err) {}
   }
 
-  function netOpenPeer(id) {
+  function netStart() {
+    if (typeof Peer === 'undefined' || replay.on) return;
+    const want = netIdFor(playerName);
+    // Already registered under this name.
+    if (net.peer && net.id === want && !net.anon) return;
+    // Name changed (or first boot): drop the old peer and claim the right id.
+    netDestroyPeer();
+    net.anon = false;
+    netOpenPeer(want);
+  }
+
+  function netOpenPeer(id, retry) {
     let peer;
     try {
       peer = id ? new Peer(id) : new Peer();
@@ -34618,16 +34663,29 @@
       return;
     }
     net.peer = peer;
-    peer.on('open', () => {
+    peer.on('open', (openId) => {
+      if (net.peer !== peer) return;
       net.ready = true;
+      net.id = openId || id || peer.id || '';
+      net.anon = !id || net.id !== id;
     });
     peer.on('connection', netIncoming);
     peer.on('error', (err) => {
-      if (err.type === 'unavailable-id' && !net.anon) {
-        net.anon = true;
+      if (net.peer !== peer) return;
+      if (err.type === 'unavailable-id' && id) {
         peer.destroy();
-        net.peer = null;
-        netOpenPeer(null);
+        if (net.peer === peer) net.peer = null;
+        // Old tabs can hold the id briefly; retry once, then warn instead of going anonymous
+        // (anonymous peers can never be invited by name).
+        if (!retry) {
+          setTimeout(() => {
+            if (!net.peer) netOpenPeer(id, true);
+          }, 1200);
+        } else {
+          net.ready = false;
+          toast.text = 'NAME TAKEN ONLINE! CHANGE YOUR NAME.';
+          toast.t = 240;
+        }
       } else if (err.type === 'peer-unavailable') {
         if (net.pending) netFail('OFFLINE');
       } else if (net.pending) {
@@ -34635,7 +34693,7 @@
       }
     });
     peer.on('disconnected', () => {
-      if (!peer.destroyed) {
+      if (net.peer === peer && !peer.destroyed) {
         try {
           peer.reconnect();
         } catch (err) {}
@@ -34651,16 +34709,33 @@
   }
 
   function netIncoming(conn) {
+    // Inbound connections can deliver the invite before 'open' in some PeerJS builds; accept once open.
+    const sendWhenOpen = (msg) => {
+      const go = () => {
+        try {
+          conn.send(msg);
+        } catch (err) {}
+      };
+      if (conn.open) go();
+      else conn.on('open', go);
+    };
     conn.on('data', (d) => {
       if (!d || typeof d !== 'object') return;
       if (d.t === 'invite') {
-        const busy = net.role || net.invite || net.pending || game.mode === 'menu';
+        const busy = net.role || net.invite || net.pending || game.mode === 'menu' || game.mode === 'coop';
         if (busy) {
-          try {
-            conn.send({ t: 'busy' });
-          } catch (err) {}
-          setTimeout(() => conn.close(), 500);
+          sendWhenOpen({ t: 'busy' });
+          setTimeout(() => {
+            try {
+              conn.close();
+            } catch (err) {}
+          }, 500);
           return;
+        }
+        if (net.invite && net.invite.conn !== conn) {
+          try {
+            net.invite.conn.close();
+          } catch (err) {}
         }
         net.invite = { conn, from: String(d.name || '???').toUpperCase().slice(0, 12), t: 0 };
         sfx('inviteDing');
@@ -34672,16 +34747,38 @@
       if (net.invite && net.invite.conn === conn) net.invite = null;
       if (conn === net.conn) netLost();
     });
+    conn.on('error', () => {
+      if (net.invite && net.invite.conn === conn) net.invite = null;
+    });
   }
 
   function netInvite(name) {
     if (!net.peer || !net.ready) {
+      // pending is already set by the caller in plane8; surface the failure
+      if (!net.pending) net.pending = { conn: { close() {} }, name: name.toUpperCase(), t: 0 };
       netFail('OFFLINE');
       return;
     }
-    const conn = net.peer.connect(netIdFor(name), { reliable: true });
-    net.pending = { conn, name: name.toUpperCase(), t: 0 };
-    conn.on('open', () => conn.send({ t: 'invite', name: playerName }));
+    const target = netIdFor(name);
+    if (target === net.id) {
+      if (!net.pending) net.pending = { conn: { close() {} }, name: name.toUpperCase(), t: 0 };
+      plane8.state = 'choose';
+      plane8.msg = "THAT'S YOUR OWN NAME!";
+      plane8.msgT = 120;
+      net.pending = null;
+      return;
+    }
+    const conn = net.peer.connect(target, { reliable: true });
+    net.pending = { conn, name: name.toUpperCase(), t: 0, opened: false };
+    conn.on('open', () => {
+      if (!net.pending || net.pending.conn !== conn) return;
+      net.pending.opened = true;
+      try {
+        conn.send({ t: 'invite', name: playerName });
+      } catch (err) {
+        netFail('OFFLINE');
+      }
+    });
     conn.on('data', (d) => {
       if (!d || typeof d !== 'object') return;
       if (net.pending && net.pending.conn === conn) {
@@ -34728,6 +34825,10 @@
     toast.text = `${net.partner} JOINED AS RED KID!`;
     toast.t = 200;
     sfx('superDing');
+    // Tell the guest we're live so they don't sit forever on JOINING if the first snapshot stalls.
+    try {
+      conn.send({ t: 'hello' });
+    } catch (err) {}
     if (game.mode === 'plane8') {
       plane8.state = 'exit';
       plane8.t = 0;
@@ -34736,13 +34837,25 @@
 
   function netAcceptInvite() {
     const iv = net.invite;
-    if (!iv) return;
+    if (!iv || !iv.conn) return;
     net.invite = null;
     net.role = 'guest';
     net.conn = iv.conn;
     net.partner = iv.from;
     net.lastRx = clockNow();
-    netSend({ t: 'accept', name: playerName, eq: inv.equipped, gear: inventory.includes('divingGear'), scuba: inventory.includes('scubaGear') });
+    net.lost = false;
+    net.ended = false;
+    // Red Kid can't bring noKid gems (like LUKE GEM) into co-op.
+    if (inv.equipped && ITEMS[inv.equipped] && ITEMS[inv.equipped].noKid) inv.equipped = null;
+    const msg = { t: 'accept', name: playerName, eq: inv.equipped, gear: inventory.includes('divingGear'), scuba: inventory.includes('scubaGear') };
+    // Send on the invite connection directly (don't depend on net.conn.open being true yet).
+    const send = () => {
+      try {
+        iv.conn.send(msg);
+      } catch (err) {}
+    };
+    if (iv.conn.open) send();
+    else iv.conn.on('open', send);
     inv.open = false;
     admin.open = false;
     dialog.active = false;
@@ -34755,9 +34868,18 @@
     if (!iv) return;
     net.invite = null;
     try {
-      iv.conn.send({ t: 'decline' });
+      if (iv.conn.open) iv.conn.send({ t: 'decline' });
+      else iv.conn.on('open', () => {
+        try {
+          iv.conn.send({ t: 'decline' });
+        } catch (err) {}
+      });
     } catch (err) {}
-    setTimeout(() => iv.conn.close(), 500);
+    setTimeout(() => {
+      try {
+        iv.conn.close();
+      } catch (err) {}
+    }, 500);
     sfx('back');
   }
 
@@ -34766,7 +34888,18 @@
     if (net.role === 'host') {
       if (d.t === 'i') net.gIn = d.k || {};
       else if (d.t === 'd') net.gDash = true;
-      else if (d.t === 'm' && battle && battle.ally && battle.phase === 'allyChoose' && Number.isInteger(d.i) && battle.ally.moves[d.i]) battle.allyMove = d.i;
+      else if (d.t === 'eq') {
+        let id = null;
+        if (d.eq != null) {
+          if (!ITEMS[d.eq] || ITEMS[d.eq].kind !== 'gem' || ITEMS[d.eq].noKid) return;
+          id = d.eq;
+        }
+        net.partnerEq = id;
+        if (sea8.kid) {
+          sea8.kid.eq = id;
+          sea8.kid.air = Math.min(sea8.kid.air, diverMaxAir(sea8.kid));
+        }
+      } else if (d.t === 'm' && battle && battle.ally && battle.phase === 'allyChoose' && Number.isInteger(d.i) && battle.ally.moves[d.i]) battle.allyMove = d.i;
       else if (d.t === 'bye') netLost();
     } else if (net.role === 'guest') {
       if (d.t === 's') netApply(d.s);
@@ -34901,6 +35034,17 @@
       if (CONFIRM_KEYS.includes(k)) location.reload();
       return true;
     }
+    if (inv.open) {
+      if (!e.repeat && (k === 'escape' || k === 'i')) {
+        inv.open = false;
+        sfx('close');
+      }
+      return true;
+    }
+    if (k === 'i' && !e.repeat && canOpenInventory()) {
+      openInventory();
+      return true;
+    }
     if (e.repeat) return true;
     const b = battle;
     if (b && b.ally && b.phase === 'allyChoose' && !net.gSent) {
@@ -34923,6 +35067,15 @@
 
   function guestClick(pt) {
     if (net.role !== 'guest') return false;
+    if (inv.open) {
+      invClick(pt);
+      return true;
+    }
+    if (canOpenInventory() && inRect(pt, BAG_BTN)) {
+      openInventory();
+      return true;
+    }
+    if (canTeleport() && inRect(pt, TP_BTN)) return true;
     const b = battle;
     if (b && b.ally && b.phase === 'allyChoose') {
       for (let i = 0; i < b.ally.moves.length; i++) if (inRect(pt, slotRect(i))) guestPickMove(i);
@@ -34993,12 +35146,20 @@
     if (net.invite && ++net.invite.t > 60 * 30) netDeclineInvite();
   }
 
+  function inviteSlideY() {
+    if (!net.invite) return 0;
+    return Math.round((Math.min(1, net.invite.t / 12) - 1) * 40);
+  }
+  function inviteBtn(r) {
+    return { x: r.x, y: r.y + inviteSlideY(), w: r.w, h: r.h };
+  }
+
   function drawInviteNote() {
     const iv = net.invite;
     if (!iv) return;
-    const slide = Math.min(1, iv.t / 12);
+    const dy = inviteSlideY();
     ctx.save();
-    ctx.translate(0, Math.round((slide - 1) * 40));
+    ctx.translate(0, dy);
     const N = INVITE_NOTE;
     cRect(N.x - 1, N.y - 1, N.w + 2, N.h + 2, '#1a0408');
     cRect(N.x, N.y, N.w, N.h, '#fff6e0');
@@ -35006,7 +35167,8 @@
     const msg = `${iv.from} WANTS YOU TO PLAY AS RED KID!`;
     drawText(msg, W / 2 + 2, N.y + 5, fitSize(msg, N.w - 16), '#3b2a1a', 'center', null);
     for (const [r, label, col] of [[INVITE_YES, 'Y: ACCEPT', '#2a8a3a'], [INVITE_NO, 'N: DECLINE', '#9a1c1a']]) {
-      const on = inRect(mouse, r);
+      const hit = inviteBtn(r);
+      const on = inRect(mouse, hit);
       cRect(r.x, r.y, r.w, r.h, on ? mixHex(col, '#ffffff', 0.25) : col);
       drawText(label, r.x + r.w / 2, r.y + 2, 8, '#ffffff', 'center', null);
     }
@@ -35016,11 +35178,11 @@
 
   function inviteKey(k, e) {
     if (!net.invite || e.repeat) return false;
-    if (k === 'y') {
+    if (k === 'y' || k === 'enter') {
       netAcceptInvite();
       return true;
     }
-    if (k === 'n') {
+    if (k === 'n' || k === 'escape') {
       netDeclineInvite();
       return true;
     }
@@ -35029,11 +35191,11 @@
 
   function inviteClick(pt) {
     if (!net.invite) return false;
-    if (inRect(pt, INVITE_YES)) {
+    if (inRect(pt, inviteBtn(INVITE_YES))) {
       netAcceptInvite();
       return true;
     }
-    if (inRect(pt, INVITE_NO)) {
+    if (inRect(pt, inviteBtn(INVITE_NO))) {
       netDeclineInvite();
       return true;
     }
@@ -37016,14 +37178,22 @@
 
   function saveName() {
     const n = menu.typing.trim();
+    const prev = playerName;
     playerName = n || 'HERO';
     store.set(STORE.name, n);
     menu.saved = 90;
     menu.focus = false;
     sfx('itemGet');
+    // Keep the PeerJS id in sync with the name friends type when inviting you.
+    if (prev !== playerName && game.mode !== 'menu' && run.mode !== 'speedrun') netStart();
   }
 
   function beginGame(mode) {
+    // Claim the online id under the final name BEFORE opening PeerJS.
+    if (!replay.on && menu.typing.trim() && menu.typing.trim() !== playerName) saveName();
+    else if (!replay.on && !menu.typing.trim() && !store.get(STORE.name, '')) {
+      playerName = 'HERO';
+    }
     if (mode !== 'speedrun') netStart();
     else boardSyncStop();
     run.mode = mode;
@@ -37041,7 +37211,6 @@
       gameRandom = seededRandom(rec.seed);
       Math.random = gameRandom;
     }
-    if (!replay.on && menu.typing.trim() && menu.typing.trim() !== playerName) saveName();
     refreshTeleport();
     tpJustUnlocked = false;
     game.mode = 'world';
