@@ -32,7 +32,7 @@
   const exportState = { on: false, encoder: null, chunks: [], n: 0, step: 0, finishing: false, saved: false, error: false };
   const net = {
     peer: null, ready: false, anon: false, id: '', role: null, conn: null, partner: '', partnerEq: null, partnerGear: false, partnerScuba: false,
-    pending: null, invite: null, gIn: {}, gDash: false, heroEq: null, heroName: '', lastRx: 0, fx: [],
+    pending: null, invite: null, gIn: {}, gDash: false, heroEq: null, heroName: '', hostGems: [], lastRx: 0, fx: [],
     gSel: 0, gSent: false, ended: false, endT: 0, lost: false, lostT: 0, inviteRects: null,
   };
   const sfx = (name, arg) => {
@@ -1726,7 +1726,13 @@
   const INV_PANEL = { x: 72, y: 8, w: 240, h: 202 };
   const INV_CLOSE = { x: INV_PANEL.x + INV_PANEL.w - 20, y: INV_PANEL.y + 6, w: 14, h: 14 };
   const EQUIP_BTN = { x: INV_PANEL.x + INV_PANEL.w / 2 - 42, y: 186, w: 84, h: 17 };
-  const invSlots = () => Math.min(INV_SIZE, 1 + inventory.filter(Boolean).length);
+  // Red Kid browses the host's gem list; everyone else uses their own bag.
+  const invItemAt = (i) => (net.role === 'guest' ? (net.hostGems || [])[i] || null : inventory[i]);
+  const invSlots = () => (net.role === 'guest'
+    ? Math.min(INV_SIZE, Math.max(1, (net.hostGems || []).length))
+    : Math.min(INV_SIZE, 1 + inventory.filter(Boolean).length));
+  const hostGemList = () => inventory.filter((id) => id && ITEMS[id] && ITEMS[id].kind === 'gem');
+  const hostBestGem = () => hostGemList().reduce((best, id) => (!best || (ITEMS[id].hpBonus || 0) > (ITEMS[best].hpBonus || 0) ? id : best), null);
 
   function invSlotRect(i) {
     if (invSlots() > 24) return { x: 84 + (i % 8) * 27, y: 26 + Math.floor(i / 8) * 29, w: 24, h: 27 };
@@ -1762,7 +1768,7 @@
   function invHitTest(x, y) {
     const p = { x, y };
     if (inRect(p, INV_CLOSE)) return 'close';
-    if (inRect(p, EQUIP_BTN) && isGem(inventory[inv.sel]) && !(net.role === 'guest' && inventory[inv.sel] && ITEMS[inventory[inv.sel]].noKid)) return 'equip';
+    if (inRect(p, EQUIP_BTN) && isGem(invItemAt(inv.sel))) return 'equip';
     for (let i = 0; i < invSlots(); i++) {
       if (inRect(p, invSlotRect(i))) return i;
     }
@@ -1775,17 +1781,11 @@
       inv.open = false;
       sfx('close');
     } else if (hit === 'equip') {
-      const id = inventory[inv.sel];
+      const id = invItemAt(inv.sel);
       if (net.role === 'guest') {
         if (game.mode === 'battle') {
           toast.text = "CAN'T SWAP GEMS IN BATTLE!";
           toast.t = 120;
-          sfx('back');
-          return;
-        }
-        if (id && ITEMS[id] && ITEMS[id].noKid) {
-          toast.text = "RED KID CAN'T USE THAT GEM!";
-          toast.t = 140;
           sfx('back');
           return;
         }
@@ -2524,7 +2524,8 @@
   }
 
   function makeBattleAlly(a) {
-    const eq = a.eq && ITEMS[a.eq] && ITEMS[a.eq].kind === 'gem' && !ITEMS[a.eq].noKid ? a.eq : null;
+    // Online Red Kid can use any gem the host owns (including ones marked noKid).
+    const eq = a.eq && ITEMS[a.eq] && ITEMS[a.eq].kind === 'gem' && (!ITEMS[a.eq].noKid || a.online) ? a.eq : null;
     const max = PLAYER_MAX_HP + ((eq && ITEMS[eq].hpBonus) || 0);
     return { name: a.name, eq, online: !!a.online, max, hp: max, disp: max, hurt: 0, moves: movesFor(eq) };
   }
@@ -5687,7 +5688,7 @@
     ctx.fillRect(0, 0, W, H);
     const P = INV_PANEL;
     drawPanel(P.x, P.y, P.w, P.h);
-    drawText('INVENTORY', P.x + 10, P.y + 9, 8, '#3b2a1a', 'left', null);
+    drawText(net.role === 'guest' ? "HOST'S GEMS" : 'INVENTORY', P.x + 10, P.y + 9, 8, '#3b2a1a', 'left', null);
 
     const c = INV_CLOSE;
     const hoverX = inRect(mouse, c);
@@ -5701,7 +5702,7 @@
 
     for (let i = 0; i < invSlots(); i++) {
       const r = invSlotRect(i);
-      const id = inventory[i];
+      const id = invItemAt(i);
       const selected = inv.sel === i;
       ctx.fillStyle = selected ? '#e8c547' : '#1c140c';
       ctx.fillRect(r.x - 1, r.y - 1, r.w + 2, r.h + 2);
@@ -5721,17 +5722,19 @@
       }
     }
 
-    const sel = inventory[inv.sel];
+    const sel = invItemAt(inv.sel);
     if (sel) {
       const item = ITEMS[sel];
       drawText(item.name + (inv.equipped === sel ? ' (EQUIPPED)' : ''), P.x + 18, P.y + 142, 8, '#9a1c1a', 'left', null);
       wrapText(item.desc, P.w - 36).slice(0, 2).forEach((line, i) => drawText(line, P.x + 18, P.y + 153 + i * 10, 8, '#3b2a1a', 'left', null));
     } else {
-      drawText(inventory.some(Boolean) ? 'SELECT AN ITEM' : 'YOUR BAG IS EMPTY', P.x + 18, P.y + 150, 8, '#8a7550', 'left', null);
+      const empty = net.role === 'guest'
+        ? ((net.hostGems || []).length ? 'SELECT A GEM' : 'HOST HAS NO GEMS')
+        : (inventory.some(Boolean) ? 'SELECT AN ITEM' : 'YOUR BAG IS EMPTY');
+      drawText(empty, P.x + 18, P.y + 150, 8, '#8a7550', 'left', null);
     }
 
-    const canEq = isGem(sel) && !(net.role === 'guest' && sel && ITEMS[sel].noKid);
-    drawButton(EQUIP_BTN, sel && inv.equipped === sel ? 'UNEQUIP' : 'EQUIP', canEq);
+    drawButton(EQUIP_BTN, sel && inv.equipped === sel ? 'UNEQUIP' : 'EQUIP', isGem(sel));
   }
 
   // ---------- World render ----------
@@ -34817,7 +34820,8 @@
     net.role = 'host';
     net.conn = conn;
     net.partner = String(d.name || 'FRIEND').toUpperCase().slice(0, 12);
-    net.partnerEq = d.eq && ITEMS[d.eq] && ITEMS[d.eq].kind === 'gem' && !ITEMS[d.eq].noKid ? d.eq : null;
+    // Red Kid uses gems from the host's bag; keep their pick only if you own that gem.
+    net.partnerEq = d.eq && inventory.includes(d.eq) && ITEMS[d.eq] && ITEMS[d.eq].kind === 'gem' ? d.eq : hostBestGem();
     net.partnerGear = !!d.gear;
     net.partnerScuba = !!d.scuba;
     net.gIn = {};
@@ -34845,8 +34849,7 @@
     net.lastRx = clockNow();
     net.lost = false;
     net.ended = false;
-    // Red Kid can't bring noKid gems (like LUKE GEM) into co-op.
-    if (inv.equipped && ITEMS[inv.equipped] && ITEMS[inv.equipped].noKid) inv.equipped = null;
+    // Equipped gem is only a suggestion; the host assigns from their own bag.
     const msg = { t: 'accept', name: playerName, eq: inv.equipped, gear: inventory.includes('divingGear'), scuba: inventory.includes('scubaGear') };
     // Send on the invite connection directly (don't depend on net.conn.open being true yet).
     const send = () => {
@@ -34891,7 +34894,8 @@
       else if (d.t === 'eq') {
         let id = null;
         if (d.eq != null) {
-          if (!ITEMS[d.eq] || ITEMS[d.eq].kind !== 'gem' || ITEMS[d.eq].noKid) return;
+          // Only gems the host actually owns can be equipped by Red Kid.
+          if (!inventory.includes(d.eq) || !ITEMS[d.eq] || ITEMS[d.eq].kind !== 'gem') return;
           id = d.eq;
         }
         net.partnerEq = id;
@@ -34950,6 +34954,7 @@
   function netSnap() {
     const s = {
       mode: game.mode, fade: fade.alpha, transT: game.transT, eq: inv.equipped, name: playerName,
+      gems: hostGemList(), kidEq: net.partnerEq,
       dlg: dialog.active ? { s: dialog.speaker, l: dialog.lines[dialog.line], c: dialog.chars } : null,
       title: titleStart !== null ? { i: titleInfo, e: clockNow() - titleStart } : null,
       toast: toast.t > 0 ? { text: toast.text, t: toast.t } : null,
@@ -34973,6 +34978,9 @@
     game.transT = s.transT || 0;
     net.heroEq = s.eq && ITEMS[s.eq] ? s.eq : null;
     net.heroName = s.name || net.partner;
+    if (Array.isArray(s.gems)) net.hostGems = s.gems.filter((id) => ITEMS[id] && ITEMS[id].kind === 'gem');
+    // Keep Red Kid's equipped gem synced with what the host accepted.
+    if (!inv.open && 'kidEq' in s) inv.equipped = s.kidEq && ITEMS[s.kidEq] ? s.kidEq : null;
     dialog.active = !!s.dlg;
     if (s.dlg) Object.assign(dialog, { lines: [s.dlg.l], line: 0, chars: s.dlg.c, speaker: s.dlg.s });
     if (s.title) {
