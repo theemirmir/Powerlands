@@ -1763,6 +1763,8 @@
     inv.open = true;
     inv.sel = -1;
     sfx('open');
+    // Ask the host for their gem list in case the big state snap dropped it.
+    if (net.role === 'guest') netSend({ t: 'needBag' });
   }
 
   function invHitTest(x, y) {
@@ -5729,7 +5731,7 @@
       wrapText(item.desc, P.w - 36).slice(0, 2).forEach((line, i) => drawText(line, P.x + 18, P.y + 153 + i * 10, 8, '#3b2a1a', 'left', null));
     } else {
       const empty = net.role === 'guest'
-        ? ((net.hostGems || []).length ? 'SELECT A GEM' : 'HOST HAS NO GEMS')
+        ? ((net.hostGems || []).length ? 'SELECT A GEM' : 'LOADING HOST\'S GEMS...')
         : (inventory.some(Boolean) ? 'SELECT AN ITEM' : 'YOUR BAG IS EMPTY');
       drawText(empty, P.x + 18, P.y + 150, 8, '#8a7550', 'left', null);
     }
@@ -34832,6 +34834,7 @@
     // Tell the guest we're live so they don't sit forever on JOINING if the first snapshot stalls.
     try {
       conn.send({ t: 'hello' });
+      conn.send({ t: 'bag', gems: hostGemList(), kidEq: net.partnerEq });
     } catch (err) {}
     if (game.mode === 'plane8') {
       plane8.state = 'exit';
@@ -34886,11 +34889,29 @@
     sfx('back');
   }
 
+  function netApplyBag(gems, kidEq) {
+    if (Array.isArray(gems)) {
+      net.hostGems = gems.filter((id) => typeof id === 'string' && ITEMS[id] && ITEMS[id].kind === 'gem');
+    }
+    if (kidEq !== undefined && !inv.open) {
+      inv.equipped = kidEq && ITEMS[kidEq] ? kidEq : null;
+    }
+  }
+
+  function netSendBag() {
+    if (net.role !== 'host' || !net.conn) return;
+    const gems = hostGemList();
+    try {
+      net.conn.send({ t: 'bag', gems, kidEq: net.partnerEq });
+    } catch (err) {}
+  }
+
   function netData(d) {
     net.lastRx = clockNow();
     if (net.role === 'host') {
       if (d.t === 'i') net.gIn = d.k || {};
       else if (d.t === 'd') net.gDash = true;
+      else if (d.t === 'needBag') netSendBag();
       else if (d.t === 'eq') {
         let id = null;
         if (d.eq != null) {
@@ -34903,10 +34924,15 @@
           sea8.kid.eq = id;
           sea8.kid.air = Math.min(sea8.kid.air, diverMaxAir(sea8.kid));
         }
+        netSendBag();
       } else if (d.t === 'm' && battle && battle.ally && battle.phase === 'allyChoose' && Number.isInteger(d.i) && battle.ally.moves[d.i]) battle.allyMove = d.i;
       else if (d.t === 'bye') netLost();
     } else if (net.role === 'guest') {
-      if (d.t === 's') netApply(d.s);
+      if (d.t === 's') {
+        // Gems are also sent at the top level so a huge sea/battle snap can't hide them.
+        netApplyBag(d.gems || (d.s && d.s.gems), d.kidEq !== undefined ? d.kidEq : (d.s && d.s.kidEq));
+        netApply(d.s);
+      } else if (d.t === 'bag') netApplyBag(d.gems, d.kidEq);
       else if (d.t === 'reward') netGuestReward(d.items || []);
       else if (d.t === 'end') {
         net.ended = true;
@@ -34954,7 +34980,6 @@
   function netSnap() {
     const s = {
       mode: game.mode, fade: fade.alpha, transT: game.transT, eq: inv.equipped, name: playerName,
-      gems: hostGemList(), kidEq: net.partnerEq,
       dlg: dialog.active ? { s: dialog.speaker, l: dialog.lines[dialog.line], c: dialog.chars } : null,
       title: titleStart !== null ? { i: titleInfo, e: clockNow() - titleStart } : null,
       toast: toast.t > 0 ? { text: toast.text, t: toast.t } : null,
@@ -34962,7 +34987,9 @@
     };
     if (game.mode === 'plane8') s.plane = { ...plane8 };
     if (game.mode === 'sea8' || (pendingBattle && pendingBattle.returnMode === 'sea8') || (battle && battle.returnMode === 'sea8')) {
-      s.sea = { ...sea8, parts: sea8.parts.slice(-60) };
+      // Strip bulky VFX so the co-op packet stays small enough for PeerJS.
+      const { parts, bubbles, tplFx, fx, ...seaCore } = sea8;
+      s.sea = { ...seaCore, parts: (parts || []).slice(-20), bubbles: (bubbles || []).slice(-20) };
     }
     if (battle) s.battle = battleSnap(battle);
     if (pendingBattle) s.pb = { enemyId: pendingBattle.enemyId, returnMode: pendingBattle.returnMode, ally: pendingBattle.ally };
@@ -34978,9 +35005,6 @@
     game.transT = s.transT || 0;
     net.heroEq = s.eq && ITEMS[s.eq] ? s.eq : null;
     net.heroName = s.name || net.partner;
-    if (Array.isArray(s.gems)) net.hostGems = s.gems.filter((id) => ITEMS[id] && ITEMS[id].kind === 'gem');
-    // Keep Red Kid's equipped gem synced with what the host accepted.
-    if (!inv.open && 'kidEq' in s) inv.equipped = s.kidEq && ITEMS[s.kidEq] ? s.kidEq : null;
     dialog.active = !!s.dlg;
     if (s.dlg) Object.assign(dialog, { lines: [s.dlg.l], line: 0, chars: s.dlg.c, speaker: s.dlg.s });
     if (s.title) {
@@ -34999,7 +35023,11 @@
 
   function netHostTick() {
     if (net.role !== 'host' || !net.conn) return;
-    if (tick % 2 === 0) netSend({ t: 's', s: netSnap() });
+    if (tick % 2 === 0) {
+      // Keep gem ids outside the fat state blob so Red Kid always gets the host's bag.
+      netSend({ t: 's', s: netSnap(), gems: hostGemList(), kidEq: net.partnerEq });
+    }
+    if (tick % 45 === 0) netSendBag();
     if (clockNow() - net.lastRx > 15000) netLost();
   }
 
@@ -35014,6 +35042,8 @@
       return true;
     }
     if (clockNow() - net.lastRx > 10000) netLost();
+    // Keep asking until the host bag arrives (big state packets sometimes drop nested fields).
+    if ((inv.open || !(net.hostGems || []).length) && tick % 40 === 0) netSend({ t: 'needBag' });
     const k = {
       u: !!(keys['w'] || keys['arrowup']), d: !!(keys['s'] || keys['arrowdown']),
       l: !!(keys['a'] || keys['arrowleft']), r: !!(keys['d'] || keys['arrowright']),
